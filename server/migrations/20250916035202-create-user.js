@@ -22,6 +22,10 @@ module.exports = {
         type: Sequelize.BOOLEAN, 
         defaultValue: false
       },
+      role: {
+        type: Sequelize.STRING,
+        defaultValue: 'student'
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
