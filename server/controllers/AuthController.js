@@ -26,6 +26,26 @@ class AuthController {
       next(err);
     }
   }
+
+  static async googleLogin(req, res, next) {
+    try {
+      const { id_token } = req.body;
+      const payload = await verifyToken(id_token);
+      const [user, created] = await User.findOrCreate({
+        where: { email: payload.email },
+        defaults: {
+          name: payload.name,
+          password: Math.random().toString(36).slice(-8),
+        },
+      });
+      const access_token = generateToken({ id: user.id, email: user.email });
+      req.access_token = access_token;
+      res.status(created ? 201 : 200).json({ access_token: req.access_token });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   static async register(req, res, next) {
     try {
       const { email, password } = req.body;
