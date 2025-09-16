@@ -45,6 +45,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       isPremium: { type: DataTypes.BOOLEAN, defaultValue: false },
+      role: { type: DataTypes.STRING, defaultValue: 'student' }
     },
     {
       sequelize,

@@ -1,6 +1,8 @@
 const { User } = require("../models");
 const { comparePassword } = require("../helpers/bcrypt");
 const { generateToken } = require("../helpers/jwt");
+const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client();
 class AuthController {
   static async login(req, res, next) {
     try {
@@ -30,7 +32,11 @@ class AuthController {
   static async googleLogin(req, res, next) {
     try {
       const { id_token } = req.body;
-      const payload = await verifyToken(id_token);
+      const ticket = await client.verifyIdToken({
+        idToken: id_token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
       const [user, created] = await User.findOrCreate({
         where: { email: payload.email },
         defaults: {

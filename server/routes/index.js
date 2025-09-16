@@ -8,7 +8,7 @@ const { guardAdmin } = require('../middlewares/authorization')
 const router = require('express').Router()
 
 router.post('/login', AuthController.login) 
-router.post('/googleLogin', AuthController.googleLogin)
+router.post('/google-login', AuthController.googleLogin)
 router.post('/register', AuthController.register)
 
 //routes below needs authentication
