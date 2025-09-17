@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import http from "../helpers/http";
-import { showError } from "../helpers/alert";
+import { showError, successLogin } from "../helpers/alert";
 
 
 export const AuthForm = (props) => {
@@ -27,8 +27,11 @@ export const AuthForm = (props) => {
         }
       })
       localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('user_data', JSON.stringify(data.user_data));
+      successLogin()
       navigate('/')
     } catch (error) {
+      // console.log(error);
       showError(error)
     }
   }
@@ -67,7 +70,10 @@ export const AuthForm = (props) => {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              handleSubmit(formData)
+            }} className="space-y-4">
               {type === "register" && (
                 <div className="form-control">
                   <label className="label">
@@ -113,13 +119,6 @@ export const AuthForm = (props) => {
                   onChange={handleChange}
                   value={formData.password}
                 />
-                {type === "login" && (
-                  <label className="label">
-                    <a href="#" className="label-text-alt link link-hover text-primary">
-                      Forgot password?
-                    </a>
-                  </label>
-                )}
               </div>
 
               <button
