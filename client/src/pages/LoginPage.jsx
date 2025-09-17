@@ -13,8 +13,9 @@ export const LoginPage = () => {
         url: '/login',
         data
       })
-      const { access_token } = response.data
+      const { access_token, user_data } = response.data
       localStorage.setItem('access_token', access_token)
+      localStorage.setItem('user_data', JSON.stringify(user_data))
       successLogin()
       navigate('/')
     } catch (error) {
