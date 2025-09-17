@@ -5,14 +5,17 @@ module.exports = {
     await queryInterface.createTable('Profiles', {
       id: {
         allowNull: false,
+        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        type: Sequelize.INTEGER
       },
       UserId: {
-        type: Sequelize.UUID, references: { model: 'Users', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE'
+        type: Sequelize.INTEGER, references: { model: 'Users', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE'
       },
       displayName: {
+        type: Sequelize.STRING
+      },
+      profilePicture: {
         type: Sequelize.STRING
       },
       createdAt: {

@@ -16,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   UserProgress.init({
-    userId: DataTypes.UUID,
-    languageId: DataTypes.UUID,
+    userId: DataTypes.INTEGER,
+    languageId: DataTypes.INTEGER,
     progress: DataTypes.JSON
   }, {
     sequelize,

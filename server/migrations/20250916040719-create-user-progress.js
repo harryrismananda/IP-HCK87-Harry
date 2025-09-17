@@ -4,16 +4,16 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('UserProgresses', {
       id: {
-        allowNull: false,
+         allowNull: false,
+        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        type: Sequelize.INTEGER,
       },
       userId: {
-        type: Sequelize.UUID, references: { model: 'Users', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE'
+        type: Sequelize.INTEGER, references: { model: 'Users', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE'
       },
       languageId: {
-        type: Sequelize.UUID, references: { model: 'Languages', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE'
+        type: Sequelize.INTEGER, references: { model: 'Languages', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE'
       },
       progress: {
         type: Sequelize.JSON

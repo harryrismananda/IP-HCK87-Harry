@@ -4,22 +4,22 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Courses', {
       id: {
-        allowNull: false,
+         allowNull: false,
+        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        type: Sequelize.INTEGER,
       },
       languageId: {
-        type: Sequelize.UUID, references: { model: 'Languages', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE'
+        type: Sequelize.INTEGER, references: { model: 'Languages', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE'
       },
       title: {
         type: Sequelize.STRING
       },
       difficulty: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       content: {
-        type: Sequelize.TEXT
+        type: Sequelize.JSON
       },
       createdAt: {
         allowNull: false,

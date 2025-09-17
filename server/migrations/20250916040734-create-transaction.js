@@ -5,18 +5,21 @@ module.exports = {
     await queryInterface.createTable('Transactions', {
       id: {
         allowNull: false,
+        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        type: Sequelize.INTEGER,
       },
       userId: {
-        type: Sequelize.UUID, references: { model: 'Users', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE'
+        type: Sequelize.INTEGER, references: { model: 'Users', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE'
       },
       provider: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'midtrans'
       },
       providerOrderId: {
-        type: Sequelize.STRING
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
+        unique: true
       },
       amount: {
         type: Sequelize.FLOAT

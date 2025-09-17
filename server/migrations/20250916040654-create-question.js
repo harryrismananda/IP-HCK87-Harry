@@ -4,13 +4,13 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Questions', {
       id: {
-        allowNull: false,
+         allowNull: false,
+        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        type: Sequelize.INTEGER,
       },
       courseId: {
-        type: Sequelize.UUID, references: { model: 'Courses', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE'
+        type: Sequelize.INTEGER, references: { model: 'Courses', key: 'id' }, onDelete: 'CASCADE', onUpdate: 'CASCADE'
       },
       choices: {
         type: Sequelize.JSON
@@ -18,8 +18,8 @@ module.exports = {
       answer: {
         type: Sequelize.TEXT
       },
-      difficulty: {
-        type: Sequelize.INTEGER
+      questionName: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,

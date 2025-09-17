@@ -15,10 +15,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Course.init({
-    languageId: DataTypes.UUID,
+    languageId: DataTypes.INTEGER,
     title: DataTypes.STRING,
-    difficulty: DataTypes.INTEGER,
-    content: DataTypes.TEXT
+    difficulty: DataTypes.STRING,
+    content: DataTypes.JSON
   }, {
     sequelize,
     modelName: 'Course',

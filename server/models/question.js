@@ -14,7 +14,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Question.init({
-    courseId: DataTypes.UUID,
+    courseId: DataTypes.INTEGER,
+    questionName: DataTypes.STRING,
     choices: DataTypes.JSON,
     answer: DataTypes.TEXT,
     difficulty: DataTypes.INTEGER
