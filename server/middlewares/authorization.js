@@ -1,6 +1,7 @@
 exports.guardAdmin = (req, res, next) => {
   try {
-    if (req.user.role !== "admin") {
+    console.log(req.user_data);
+    if (req.user_data.role !== "admin") {
       throw { name: "Forbidden", message: "You are not authorized to access this resource" };
     }
     next();
@@ -10,10 +11,11 @@ exports.guardAdmin = (req, res, next) => {
 };
 exports.premiumAccess = (req, res, next) => {
   try {
-    if (req.user.isPremium !== true) {
+    if (req.user_data.status === true || req.user_data.role === "admin") {
+      next();
+    } else {
       throw { name: "Forbidden", message: "You are not authorized to access this resource" };
     }
-    next();
   } catch (err) {
     next(err);
   }

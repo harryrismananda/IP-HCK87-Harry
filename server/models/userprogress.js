@@ -10,8 +10,8 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      UserProgress.belongsTo(models.User, { foreignKey: "UserId" });
-      UserProgress.belongsTo(models.Language, { foreignKey: "LanguageId" });  
+      UserProgress.belongsTo(models.User, { foreignKey: "userId" });
+      UserProgress.belongsTo(models.Language, { foreignKey: "languageId" });  
       // define association here
     }
   }
