@@ -13,6 +13,9 @@ class LanguageController {
   static async getLanguageById(req, res, next) {
     try {
       const { id } = req.params;
+      if (isNaN(Number(id))) {
+        throw { name: "Bad Request", message: "Invalid language ID format" };
+      }
       const language = await Language.findByPk(id);
       if (!language) {
         throw { name: "NotFound", message: "Language not found" };
@@ -36,6 +39,9 @@ class LanguageController {
   static async deleteLanguage(req, res, next) {
     try {
       const { id } = req.params;
+     if (isNaN(Number(id))) {
+        throw { name: "Bad Request", message: "Invalid language ID format" };
+      }
       const language = await Language.findByPk(id);
       if (!language) {
         throw { name: "NotFound", message: "Language not found" };

@@ -11,6 +11,9 @@ module.exports = class QuestionController {
   static async getQuestionById(req, res, next) {
     try {
       const { id } = req.params;  
+      if (isNaN(Number(id))) {
+        throw { name: "Bad Request", message: "Invalid question ID format" };
+      }
       const question = await Question.findByPk(id);
       if (!question) {
         throw { name: "NotFound", message: "Question not found" };
@@ -22,8 +25,17 @@ module.exports = class QuestionController {
   }
   static async createQuestion(req, res, next) {
     try {
-      const { text, answer, courseId } = req.body;  
-      const newQuestion = await Question.create({ text, answer, courseId });
+      const { questionName, answer, courseId, choices } = req.body;  
+
+       if (isNaN(Number(courseId)) ) {
+        throw { name: "Bad Request", message: "Invalid courseId format" };
+      }
+
+      if (!questionName || !answer || !courseId) {
+        throw { name: "Bad Request", message: "Text, answer, and courseId are required" };
+      }
+     
+      const newQuestion = await Question.create({ questionName, answer, courseId, choices });
       res.status(201).json(newQuestion);
     } catch (err) {
       next(err);
