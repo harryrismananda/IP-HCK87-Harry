@@ -17,6 +17,10 @@ router.post('/register', AuthController.register)
 // Transaction webhook endpoint - needs to be before authentication
 router.post(`/transactions/transaction-status`, TransactionController.transactionNotification)
 
+//language routes
+router.get(`/languages`, LanguageController.getAllLanguages)
+router.get(`/languages/:id`, LanguageController.getLanguageById)
+
 //routes below needs authentication
 router.use(authenticate)
 
@@ -31,9 +35,7 @@ router.get(`/user/:id/progress`, UserController.getAllUserProgress)
 router.get(`/user/:id/progress/:languageId`, UserController.getUserProgress)
 router.put(`/user/:id/progress/:languageId`, UserController.updateUserProgress)
 
-//language routes
-router.get(`/languages`, LanguageController.getAllLanguages)
-router.get(`/languages/:id`, LanguageController.getLanguageById)
+
 
 //courses routes
 router.get(`/courses`, premiumAccess, CourseController.getAllCourses) //premium only
