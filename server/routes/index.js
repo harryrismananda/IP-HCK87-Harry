@@ -39,7 +39,6 @@ router.put(`/user/:id/progress/:languageId`, UserController.updateUserProgress)
 
 //courses routes
 router.get(`/courses`, premiumAccess, CourseController.getAllCourses) //premium only
-router.get(`/courses/all`, CourseController.getAllCourses) //public access with premium filtering
 router.post(`/courses`, CourseController.createCourse)
 router.get(`/courses/language/:languageId`, CourseController.getCourseByLanguageId) //some are preemium
 router.get(`/courses/:id`, CourseController.getCourseById) //some are preemium

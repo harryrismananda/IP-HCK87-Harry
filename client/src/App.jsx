@@ -3,6 +3,7 @@ import { AuthLayout } from "./layouts/AuthLayout";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { CMSHomePage } from "./pages/CMSHomePage";
+import { AddCoursePage } from "./pages/AddCoursePage";
 import { MainLayout } from "./layouts/MainLayout";
 import { CMSLayout } from "./layouts/CMSLayout";
 import { ProfilePage } from "./pages/ProfilePage";
@@ -17,6 +18,8 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 
 function App() {
+  console.log('App component rendering');
+  
   return (
     <>
     <Provider store={store} >
@@ -26,6 +29,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
           </Route>
+          {/* Public route for homepage */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/profile" element={<ProfilePage />} />
@@ -36,6 +40,7 @@ function App() {
           </Route>
           <Route element={<CMSLayout />}>
             <Route path="/cms/home" element={<CMSHomePage />} />
+            <Route path="/cms/add-course" element={<AddCoursePage />} />
             <Route path="/cms/users" element={<CMSUserPage />} />
             <Route path="/cms/questions" element={<CMSQuestionPage />} />
           </Route>

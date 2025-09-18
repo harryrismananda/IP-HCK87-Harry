@@ -17,37 +17,38 @@ export const AuthForm = (props) => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleCredentialResponse = async (response) => {
-    try {
-      const {data} = await http({
-        method: 'POST',
-        url: '/google-login',
-        data: {
-          googleToken: response.credential
-        }
-      })
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('user_data', JSON.stringify(data.user_data));
-      successLogin()
-      navigate('/')
-    } catch (error) {
-      // console.log(error);
-      showError(error)
-    }
-  }
-
   useEffect(() => {
-    google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID, 
-      callback: handleCredentialResponse
-    });
-    google.accounts.id.renderButton(
-      document.getElementById("google-button"),
-      { theme: "outline", size: "large" }  // customization attributes
-    );
+    const handleCredentialResponse = async (response) => {
+      try {
+        const {data} = await http({
+          method: 'POST',
+          url: '/google-login',
+          data: {
+            googleToken: response.credential
+          }
+        })
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('user_data', JSON.stringify(data.user_data));
+        successLogin()
+        navigate('/')
+      } catch (error) {
+        // console.log(error);
+        showError(error)
+      }
+    }
 
-  }, [])
-  // console.log(formData)
+    if (window.google) {
+      window.google.accounts.id.initialize({
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse
+      });
+      window.google.accounts.id.renderButton(
+        document.getElementById("google-button"),
+        { theme: "outline", size: "large" }
+      );
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -69,7 +70,7 @@ export const AuthForm = (props) => {
               </p>
             </div>
 
-            {/* Form */}
+            {/* Form Section */}
             <form onSubmit={(e) => {
               e.preventDefault()
               handleSubmit(formData)
@@ -119,6 +120,13 @@ export const AuthForm = (props) => {
                   onChange={handleChange}
                   value={formData.password}
                 />
+                {type === "login" && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
+                    </span>
+                  </label>
+                )}
               </div>
 
               <button

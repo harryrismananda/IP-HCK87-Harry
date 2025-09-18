@@ -9,8 +9,14 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
-  // Get user data from localStorage
-  const user_data = JSON.parse(localStorage.getItem("user_data") || '{}');
+  // Get user data from localStorage with error handling
+  let user_data = {};
+  try {
+    user_data = JSON.parse(localStorage.getItem("user_data") || '{}');
+  } catch (error) {
+    console.error('Invalid user_data in localStorage:', error);
+    localStorage.removeItem("user_data");
+  }
   
   // Redux state for profile data
   const { data: profileData } = useSelector(state => state.profile);

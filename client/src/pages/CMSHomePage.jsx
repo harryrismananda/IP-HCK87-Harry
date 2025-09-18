@@ -2,16 +2,22 @@
 
 
 import  { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { showError } from "../helpers/alert";
 import http from "../helpers/http";
+import { AddLanguageModal } from "../components/AddLanguageModal";
 
 export const CMSHomePage = () => {
+  const navigate = useNavigate();
 
   // Sample language data - replace with actual API call
   const [languages, setLanguages] = useState([]);
 
   // Sample course data - replace with actual API call
   const [courses, setCourses] = useState([]);
+
+  // Modal states
+  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
 
   const fetchLanguages = async () => {
     try {
@@ -47,6 +53,10 @@ useEffect(() => {
   fetchCourses()
 }, [])
 
+  const handleLanguageAdded = (newLanguage) => {
+    setLanguages(prev => [...prev, newLanguage]);
+  };
+
   const getDifficultyBadge = (difficulty) => {
     const badges = {
       "Beginner": "badge-success",
@@ -63,7 +73,10 @@ useEffect(() => {
         <div className="card-body p-4 lg:p-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <h2 className="card-title text-xl lg:text-2xl">Language Management</h2>
-            <button className="btn btn-primary btn-sm lg:btn-md">
+            <button 
+              className="btn btn-primary btn-sm lg:btn-md"
+              onClick={() => setIsLanguageModalOpen(true)}
+            >
               Add New Language
             </button>
           </div>
@@ -111,7 +124,10 @@ useEffect(() => {
                 <p className="text-lg font-medium mb-2">No languages found</p>
                 <p className="text-sm">Add your first language to get started</p>
               </div>
-              <button className="btn btn-primary mt-4">
+              <button 
+                className="btn btn-primary mt-4"
+                onClick={() => setIsLanguageModalOpen(true)}
+              >
                 Add First Language
               </button>
             </div>
@@ -124,7 +140,10 @@ useEffect(() => {
         <div className="card-body p-4 lg:p-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <h2 className="card-title text-xl lg:text-2xl">Course Management</h2>
-            <button className="btn btn-primary btn-sm lg:btn-md">
+            <button 
+              className="btn btn-primary btn-sm lg:btn-md"
+              onClick={() => navigate('/cms/add-course')}
+            >
               Add New Course
             </button>
           </div>
@@ -193,13 +212,23 @@ useEffect(() => {
                 <p className="text-lg font-medium mb-2">No courses found</p>
                 <p className="text-sm">Create your first course to start teaching</p>
               </div>
-              <button className="btn btn-primary mt-4">
+              <button 
+                className="btn btn-primary mt-4"
+                onClick={() => navigate('/cms/add-course')}
+              >
                 Add First Course
               </button>
             </div>
           )}
         </div>
       </div>
+
+      {/* Add Language Modal */}
+      <AddLanguageModal
+        isOpen={isLanguageModalOpen}
+        onClose={() => setIsLanguageModalOpen(false)}
+        onLanguageAdded={handleLanguageAdded}
+      />
     </div>
   );
 };
