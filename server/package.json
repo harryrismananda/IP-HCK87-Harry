@@ -7,7 +7,8 @@
     "test": "jest --verbose --runInBand --forceExit --detectOpenHandles --coverage",
     "dev": "nodemon bin/www",
     "db": "npx sequelize db:migrate:undo:all && npx sequelize db:migrate && npx sequelize db:seed:all",
-    "dbtest": "npx sequelize db:drop --env test && npx sequelize db:create --env test && npx sequelize db:migrate --env test"
+    "dbtest": "npx sequelize db:drop --env test && npx sequelize db:create --env test && npx sequelize db:migrate --env test",
+    "dbprod": "npx sequelize db:migrate --env production && npx sequelize db:seed:all --env production"
   },
   "keywords": [],
   "author": "",
