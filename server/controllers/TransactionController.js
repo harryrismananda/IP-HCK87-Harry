@@ -3,6 +3,7 @@ const midtransClient = require("midtrans-client");
 let snap = new midtransClient.Snap({
   isProduction: false, // Try sandbox mode first
   serverKey: process.env.MIDTRANS_SERVER_KEY,
+  clientKey: process.env.MIDTRANS_CLIENT_KEY,
 });
 
 class TransactionController {
@@ -80,9 +81,6 @@ class TransactionController {
           first_name: user.fullName,
           email: user.email,
         },
-        callbacks: {
-          finish: "http://localhost:5173/payment?status=finished",
-        },
       };
       res
         .status(200)
@@ -94,68 +92,129 @@ class TransactionController {
 
   static async transactionNotification(req, res, next) {
     try {
-      const notificationJson = req.body;
-      
-      // Validate notification data
-      if (!notificationJson || Object.keys(notificationJson).length === 0) {
-        return res.status(500).json({ 
-          message: "Invalid notification data" 
-        });
-      }
-      
-      // Check if order_id exists in notification
-      if (!notificationJson.order_id) {
-        return res.status(500).json({ 
-          message: "Missing order_id in notification" 
-        });
-      }
-      
-      const statusResponse = await snap.transaction.notification(
-        notificationJson
-      );
-      
-      // Use transaction status from notification data first, fallback to statusResponse
-      const transactionStatus = notificationJson.transaction_status || statusResponse.transaction_status;
-      
-      // Check if transaction is failed, denied, expired, cancelled or pending - reject these
-      const failedStatuses = ['failed', 'deny', 'expire', 'cancel', 'pending'];
-      if (failedStatuses.includes(transactionStatus)) {
-        return res.status(400).json({ 
-          message: "Transaction not successful", 
-          transactionStatus 
-        });
-      }
+     const notificationJson = req.body;
 
-      // If transaction is successful, update user to premium
-      if (transactionStatus === "capture" || transactionStatus === "settlement") {
-        // Extract order ID to find the associated transaction
-        const orderId = notificationJson.order_id || statusResponse.order_id;
-        
-        // Find the transaction by parsing the order ID (format: ORD-{id}-{timestamp})
-        const orderIdParts = orderId.split('-');
-        if (orderIdParts.length >= 2) {
-          const transactionId = parseInt(orderIdParts[1]);
-          
-          // Find transaction by numeric ID
-          if (!isNaN(transactionId)) {
-            const transaction = await Transaction.findByPk(transactionId);
-            
-            if (transaction) {
-              // Update user to premium status
-              await User.update(
-                { isPremium: true },
-                { where: { id: transaction.userId } }
-              );
-            }
-          }
-        }
+    const statusResponse = await snap.transaction.notification(notificationJson);
+
+    const orderId = statusResponse.order_id;
+    const transactionStatus = statusResponse.transaction_status;
+    const fraudStatus = statusResponse.fraud_status;
+
+    console.log(
+      `📩 Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}. Fraud status: ${fraudStatus}`
+    );
+
+    // Sample transactionStatus handling logic
+    if (transactionStatus === "capture") {
+      if (fraudStatus === "accept") {
+        // ✅ set transaction status on your database to 'success'
+        const transaction = await Transaction.update(
+          { status: "success" },
+          { where: { providerOrderId: orderId } }
+        );
+        await User.update({ isPremium: true }, { where: { id: transaction.userId } });
+        return res.json({ message: `Transaction ${fraudStatus}` });
       }
-      
-      res.status(200).json({ message: "Notification received", transactionStatus });
-    } catch (error) {
-      next(error);
+    } else if (transactionStatus === "settlement") {
+      const transaction = await Transaction.update(
+        { status: "success" },
+        { where: { providerOrderId: orderId } }
+      );
+      await User.update({ isPremium: true }, { where: { id: transaction.userId } });
+      return res.json({ message: `Transaction ${fraudStatus}` });
+    } else if (
+      transactionStatus === "cancel" ||
+      transactionStatus === "deny" ||
+      transactionStatus === "expire"
+    ) {
+      await Transaction.update(
+        { status: "failure" },
+        { where: { providerOrderId: orderId } }
+      );
+      return res.json({ message: `Transaction ${fraudStatus}` });
+    } else if (transactionStatus === "pending") {
+      await Transaction.update(
+        { status: "pending" },
+        { where: { providerOrderId: orderId } }
+      );
+      return res.json({ message: `Transaction ${fraudStatus}` });
     }
+
+    // If no branch matched, still acknowledge Midtrans
+    return res.json({ message: "Notification received" });
+  } catch (error) {
+    // console.error("❌ Midtrans notification error:", error);
+    // Important: Still return 200 so Midtrans doesn’t retry endlessly
+    return res.status(200).json({
+      message: "Notification received but error occurred",
+      error: error.message,
+    });
   }
+  }
+  // static async transactionNotification(req, res, next) {
+  //   try {
+  //     const notificationJson = req.body;
+      
+  //     // Validate notification data
+  //     if (!notificationJson || Object.keys(notificationJson).length === 0) {
+  //       return res.status(500).json({ 
+  //         message: "Invalid notification data" 
+  //       });
+  //     }
+      
+  //     // Check if order_id exists in notification
+  //     if (!notificationJson.order_id) {
+  //       return res.status(500).json({ 
+  //         message: "Missing order_id in notification" 
+  //       });
+  //     }
+      
+  //     const statusResponse = await snap.transaction.notification(
+  //       notificationJson
+  //     );
+      
+  //     // Use transaction status from notification data first, fallback to statusResponse
+  //     const transactionStatus = notificationJson.transaction_status || statusResponse.transaction_status;
+      
+  //     // Check if transaction is failed, denied, expired, cancelled or pending - reject these
+  //     const failedStatuses = ['failed', 'deny', 'expire', 'cancel', 'pending'];
+  //     if (failedStatuses.includes(transactionStatus)) {
+  //       return res.status(400).json({ 
+  //         message: "Transaction not successful", 
+  //         transactionStatus 
+  //       });
+  //     }
+
+  //     // If transaction is successful, update user to premium
+  //     if (transactionStatus === "capture" || transactionStatus === "settlement") {
+  //       // Extract order ID to find the associated transaction
+  //       const orderId = notificationJson.order_id || statusResponse.order_id;
+        
+  //       // Find the transaction by parsing the order ID (format: ORD-{id}-{timestamp})
+  //       const orderIdParts = orderId.split('-');
+  //       if (orderIdParts.length >= 2) {
+  //         const transactionId = parseInt(orderIdParts[1]);
+          
+  //         // Find transaction by numeric ID
+  //         if (!isNaN(transactionId)) {
+  //           const transaction = await Transaction.findByPk(transactionId);
+            
+  //           if (transaction) {
+  //             // Update user to premium status
+  //             await User.update(
+  //               { isPremium: true },
+  //               { where: { providerOrderId: id: transaction.userId } }
+  //             );
+  //           }
+  //         }
+  //       }
+  //     }
+      
+  //     res.status(200).json({ message: "Notification received", transactionStatus });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
 }
 
 module.exports = TransactionController;

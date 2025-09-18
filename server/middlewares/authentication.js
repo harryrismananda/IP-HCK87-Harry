@@ -1,6 +1,7 @@
 const { verifyToken } = require("../helpers/jwt");
 const { User } = require("../models");
 exports.authenticate = async (req, res, next) => {
+  console.log("TEST AUTHEN");
   try {
     if (!req.headers.authorization) {
       throw { name: "Unauthorized", message: "No authorization header" };
