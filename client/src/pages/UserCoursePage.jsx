@@ -43,10 +43,6 @@ export const UserCoursePage = () => {
     try {
       const token = localStorage.getItem('access_token');
       const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-      
-      if (!token || !userData.id) {
-        return;
-      }
 
       // Get all languages first to check progress for each
       const languagesResponse = await http({
@@ -82,6 +78,7 @@ export const UserCoursePage = () => {
       setUserProgress(progressData);
     } catch (error) {
       console.error('Error fetching user progress:', error);
+      showError(error);
       setUserProgress([]);
     }
   };
@@ -180,13 +177,7 @@ export const UserCoursePage = () => {
     try {
       setRegistering(course.id); // Set loading state for this specific course
       
-      const token = localStorage.getItem('access_token');
       const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-
-      if (!token || !userData.id) {
-        navigate('/login');
-        return;
-      }
 
       // Check if already registered to prevent duplicate registration
       if (isUserRegisteredForLanguage(course.languageId)) {
@@ -197,7 +188,7 @@ export const UserCoursePage = () => {
       await http({
         method: 'POST',
         url: `/user/${userData.id}/progress`,
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
         data: {
           languageId: course.languageId,
           userId: userData.id

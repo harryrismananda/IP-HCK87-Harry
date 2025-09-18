@@ -2,32 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
 import http from "../helpers/http";
 import { showError, successEnrollment } from "../helpers/alert";
+import { fetchLanguage } from "../slices/languageSlice";
 
 export const HomePage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
+  // Redux state
+  const { data: languages, loading: languagesLoading } = useSelector(state => state.language);
+  
+  // Local state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [languages, setLanguages] = useState([]);
   const [selectedLanguage, setSelectedLanguage] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchLanguages();
-  }, []);
-
-  const fetchLanguages = async () => {
-    try {
-      const response = await http({
-        method: 'GET',
-        url: '/languages',
-        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
-      });
-      setLanguages(response.data);
-    } catch (error) {
-      showError(error);
-    }
-  };
+    dispatch(fetchLanguage());
+  }, [dispatch]);
 
   const handleEnrollment = async (languageId) => {
     // Prevent multiple simultaneous enrollments
@@ -35,13 +29,7 @@ export const HomePage = () => {
     
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
       const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-      
-      if (!token || !userData.id) {
-        navigate('/login');
-        return;
-      }
 
       // Find the selected language name for the success message
       const language = languages.find(lang => lang.id === languageId);
@@ -52,7 +40,7 @@ export const HomePage = () => {
       await http({
         method: 'POST',
         url: `/user/${userData.id}/progress`,
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
         data: { 
           languageId: languageId,
           userId: userData.id

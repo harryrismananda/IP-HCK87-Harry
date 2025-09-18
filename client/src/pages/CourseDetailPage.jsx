@@ -1,63 +1,45 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
 import http from "../helpers/http";
 import { showError, showSuccess } from "../helpers/alert";
+import { fetchCourseDetail, courseDetailActions } from "../slices/courseDetailSlice";
 
 export const CourseDetailPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { courseId } = useParams();
-  const [course, setCourse] = useState(null);
-  const [loading, setLoading] = useState(true);
+  
+  // Redux state
+  const { data: course, loading } = useSelector(state => state.courseDetail);
+  
+  // Local state
   const [isRegistered, setIsRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [expandedLessons, setExpandedLessons] = useState({});
 
   useEffect(() => {
     if (!courseId) return;
-
-    const fetchCourseDetails = async () => {
-      try {
-        const token = localStorage.getItem('access_token');
-        if (!token) {
-          navigate('/login');
-          return;
-        }
-
-        const response = await http({
-          method: 'GET',
-          url: `/courses/${courseId}`,
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setCourse(response.data);
-      } catch (error) {
-        showError(error);
-        navigate('/courses');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCourseDetails();
-  }, [courseId, navigate]);
+    
+    // Clear previous course data when courseId changes
+    dispatch(courseDetailActions.clearCourseDetail());
+    
+    // Fetch new course details
+    dispatch(fetchCourseDetail(courseId));
+  }, [courseId, dispatch]);
 
   // Check user registration when course data is loaded
   useEffect(() => {
     if (course && course.languageId) {
       const checkUserRegistration = async () => {
         try {
-          const token = localStorage.getItem('access_token');
           const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-          
-          if (!token || !userData.id) {
-            navigate('/login');
-            return;
-          }
 
           // Get user progress for this specific language
           const response = await http({
             method: 'GET',
             url: `/user/${userData.id}/progress/${course.languageId}`,
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
           });
 
           const progress = response.data;
@@ -72,7 +54,7 @@ export const CourseDetailPage = () => {
 
       checkUserRegistration();
     }
-  }, [course, navigate]);
+  }, [course]);
 
   const parseCourseContent = (content) => {
     try {
@@ -137,13 +119,7 @@ export const CourseDetailPage = () => {
     
     try {
       setRegistering(true);
-      const token = localStorage.getItem('access_token');
-      const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-
-      if (!token || !userData.id) {
-        navigate('/login');
-        return;
-      }
+      const userData = JSON.parse(localStorage.getItem('user_data'));
 
       // Check if already registered to prevent duplicate registration
       if (isRegistered) {
@@ -155,7 +131,7 @@ export const CourseDetailPage = () => {
       await http({
         method: 'POST',
         url: `/user/${userData.id}/progress`,
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
         data: {
           languageId: course.languageId,
           userId: userData.id

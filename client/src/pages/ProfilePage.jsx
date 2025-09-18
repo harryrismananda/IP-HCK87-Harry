@@ -1,26 +1,21 @@
 import { useState, useEffect } from "react";
 import http from "../helpers/http";
-import { showError, successProfilePicture } from "../helpers/alert";
+import { showError, successProfilePicture, showSuccess } from "../helpers/alert";
 import { useNavigate } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProfile, updateProfile } from "../slices/profileSlice";
 
 
 export const ProfilePage = () => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const user_data = JSON.parse(localStorage.getItem("user_data") || '{}')
   
-  // Check if user data exists, if not redirect to login
-  useEffect(() => {
-    if (!user_data.id || !localStorage.getItem("access_token")) {
-      navigate('/login');
-    }
-  }, [navigate, user_data.id]);
+  // Redux state
+  const { loading, data: profileData, error } = useSelector(state => state.profile);
 
-  const [user, setUser] = useState({
-    displayName: "",
-    isPremium: false,
-    profilePicture: ""
-  });
-  const [email, _setEmail] = useState(user_data.email || "");
+  // Local state for form and UI
+  const [email] = useState(user_data.email || "");
   const [userProgress, setUserProgress] = useState([]);
   const [progressStats, setProgressStats] = useState({
     overallProgress: 0,
@@ -31,37 +26,45 @@ export const ProfilePage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
-
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-const fetchUserProfile = async () => {
-    try {
-      const response = await http({
-        method: 'get',
-        url: `/user/${JSON.parse(localStorage.getItem("user_data")).id}/profile`,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`
-        }
-      });
-      console.log('Fetched profile data:', response.data);
-      setUser(response.data);
-    } catch (error) {
-      // If profile doesn't exist, create a default one
-      if (error.message?.includes("Please input your profile information")) {
-        setUser({
-          displayName: user_data.fullName || "",
-          isPremium: false,
-          profilePicture: ""
-        });
-      } else {
-        showError(error);
-      }
-    } finally {
-      setLoading(false);
+  
+  // Single source of truth for form data - derived from profileData or defaults
+  const getFormData = () => {
+    if (profileData) {
+      return {
+        displayName: profileData.displayName || "",
+        isPremium: profileData.isPremium || false,
+        profilePicture: profileData.profilePicture || ""
+      };
     }
+    // Fallback to defaults if no profile data yet (during loading)
+    return {
+      displayName: user_data.fullName || "",
+      isPremium: user_data.isPremium || false,
+      profilePicture: ""
+    };
   };
+
+  const [formData, setFormData] = useState(getFormData());
+
+  // Fetch profile data on component mount
+  useEffect(() => {
+    if (user_data.id) {
+      dispatch(fetchProfile(user_data.id));
+    }
+  }, [dispatch, user_data.id]);
+
+  // Update form data only when profileData changes from Redux
+  useEffect(() => {
+    if (profileData) {
+      setFormData({
+        displayName: profileData.displayName || "",
+        isPremium: profileData.isPremium || false,
+        profilePicture: profileData.profilePicture || ""
+      });
+    }
+  }, [profileData]);
 
   const calculateProgressStats = (progressData) => {
     if (!progressData || progressData.length === 0) {
@@ -134,43 +137,34 @@ const fetchUserProfile = async () => {
     
     setUploadingImage(true);
     try {
-      const formData = new FormData();
-      formData.append('imgUrl', selectedFile);
+      const formDataUpload = new FormData();
+      formDataUpload.append('imgUrl', selectedFile);
       
-      const response = await fetch(`http://localhost:3000/user/${user_data.id}/profile`, {
+      const response = await http({
         method: 'PATCH',
+        url: `/user/${user_data.id}/profile`,
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`
         },
-        body: formData
+        data: formDataUpload
       });
+
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Upload error response:', errorData);
-        throw new Error(errorData.message || 'Failed to upload image');
-      }
-      
-      const result = await response.json();
-      console.log('Upload result:', result);
-      
-      // Refresh the user profile to get the updated profile picture
-      await fetchUserProfile();
-      
-      // Clear file selection
+      // Clear file selection first
       setSelectedFile(null);
       setPreviewUrl(null);
-      
-      // Reset file input
       const fileInput = document.querySelector('input[type="file"]');
       if (fileInput) fileInput.value = '';
       
+      // Refresh the profile data to get the updated picture
+     dispatch(fetchProfile(user_data.id));
+      
       // Show success message
-      successProfilePicture();
+      successProfilePicture(response.data.message);
       
     } catch (error) {
-      console.error('Error uploading image:', error);
-      showError('Failed to upload profile picture. Please try again.');
+      // console.error('Error uploading image:', error);
+      showError(error);
     } finally {
       setUploadingImage(false);
     }
@@ -185,40 +179,19 @@ const fetchUserProfile = async () => {
 
   useEffect(() => {
     const loadData = async () => {
+      // User progress data - keep as is since it's not part of profile slice yet
       try {
         const response = await http({
           method: 'get',
-          url: `/user/${JSON.parse(localStorage.getItem("user_data")).id}/profile`,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`
-          }
-        });
-        setUser(response.data);
-      } catch (error) {
-        // If profile doesn't exist, create a default one
-        if (error.message?.includes("Please input your profile information")) {
-          setUser({
-            displayName: user_data.fullName || "",
-            isPremium: false,
-            profilePicture: ""
-          });
-        } else {
-          showError(error);
-        }
-      }
-
-      try {
-        const response = await http({
-          method: 'get',
-          url: `/user/${JSON.parse(localStorage.getItem("user_data")).id}/progress`,
+          url: `/user/${user_data.id}/progress`,
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`
           }
         });
         setUserProgress(response.data);
         calculateProgressStats(response.data);
-      } catch (error) {
-        console.error('Error fetching user progress:', error);
+      } catch {
+        // Silently handle error, let Redux error state handle it
         setUserProgress([]);
         setProgressStats({
           overallProgress: 0,
@@ -227,25 +200,21 @@ const fetchUserProfile = async () => {
           totalLessons: 0
         });
       }
-      setLoading(false);
     };
     loadData();
-  }, [user_data.fullName]);
+  }, [user_data.id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      await http({
-        method: 'put',
-        url: `/user/${user_data.id}/profile`,
-        data: { displayName: user.displayName },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`
-        }
-      });
+      await dispatch(updateProfile({
+        userId: user_data.id,
+        data: { displayName: formData.displayName }
+      })).unwrap();
+      
       setIsEditing(false);
-      // Show success message
+      showSuccess('Profile updated successfully!');
     } catch (error) {
       showError(error);
     } finally {
@@ -255,12 +224,19 @@ const fetchUserProfile = async () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setUser({ ...user, [name]: value });
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
   
   
 
-  if (loading) {
+  // Handle Redux errors
+  useEffect(() => {
+    if (error) {
+      showError(error);
+    }
+  }, [error]);
+
+  if (loading && !profileData) {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center">
         <div className="loading loading-spinner loading-lg text-primary"></div>
@@ -281,6 +257,8 @@ const fetchUserProfile = async () => {
           </p>
         </div>
 
+
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Profile Summary Card */}
           <div className="lg:col-span-1">
@@ -288,15 +266,15 @@ const fetchUserProfile = async () => {
               <div className="card-body items-center text-center">
                 <div className="avatar placeholder mb-4">
                   <div className="bg-primary text-primary-content rounded-full w-24 h-24 relative">
-                    {previewUrl || user.profilePicture ? (
+                    {previewUrl || formData.profilePicture ? (
                       <img 
-                        src={previewUrl || user.profilePicture} 
+                        src={previewUrl || formData.profilePicture} 
                         alt="Profile" 
                         className="rounded-full w-full h-full object-cover"
                       />
                     ) : (
                       <span className="text-2xl font-bold">
-                        {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                        {formData.displayName ? formData.displayName.charAt(0).toUpperCase() : 'U'}
                       </span>
                     )}
                     {/* Upload overlay when editing */}
@@ -312,7 +290,7 @@ const fetchUserProfile = async () => {
                 </div>
                 
                 <h2 className="card-title text-xl">
-                  {user.displayName || user_data.fullName || 'User'}
+                  {formData.displayName || user_data.fullName || 'User'}
                 </h2>
                 
                 <p className="text-base-content/60 text-sm">
@@ -320,15 +298,18 @@ const fetchUserProfile = async () => {
                 </p>
                 
                 <div className="badge badge-lg mt-2">
-                  {user.isPremium ? (
+                  {formData.isPremium ? (
                     <span className="badge badge-success">Premium Member</span>
                   ) : (
                     <span className="badge badge-ghost">Free Member</span>
                   )}
                 </div>
 
-                {!user.isPremium && (
-                  <button className="btn btn-primary btn-sm mt-4">
+                {!formData.isPremium && (
+                  <button 
+                    className="btn btn-primary btn-sm mt-4"
+                    onClick={() => navigate('/payment')}
+                  >
                     Upgrade to Premium
                   </button>
                 )}
@@ -355,7 +336,11 @@ const fetchUserProfile = async () => {
                         className="btn btn-ghost btn-sm"
                         onClick={() => {
                           setIsEditing(false);
-                          fetchUserProfile(); // Reset changes
+                          // Reset to current profile data (single source of truth)
+                          setFormData(getFormData());
+                          // Clear any file selection
+                          setSelectedFile(null);
+                          setPreviewUrl(null);
                         }}
                       >
                         Cancel
@@ -373,7 +358,7 @@ const fetchUserProfile = async () => {
                     <input
                       type="text"
                       name="displayName"
-                      value={user.displayName}
+                      value={formData.displayName}
                       onChange={handleChange}
                       className={`input input-bordered w-full ${!isEditing ? 'input-disabled' : 'focus:input-primary'}`}
                       placeholder="Enter your display name"
@@ -405,11 +390,11 @@ const fetchUserProfile = async () => {
                       <span className="label-text font-medium">Account Status</span>
                     </label>
                     <div className="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
-                      <div className={`badge ${user.isPremium ? 'badge-success' : 'badge-ghost'}`}>
-                        {user.isPremium ? 'Premium' : 'Free'}
+                      <div className={`badge ${formData.isPremium ? 'badge-success' : 'badge-ghost'}`}>
+                        {formData.isPremium ? 'Premium' : 'Free'}
                       </div>
                       <span className="text-sm text-base-content/70">
-                        {user.isPremium 
+                        {formData.isPremium 
                           ? 'Enjoy unlimited access to all courses and features' 
                           : 'Upgrade to premium for unlimited access'
                         }
@@ -571,20 +556,18 @@ const fetchUserProfile = async () => {
                   Go To CMS
                 </button>}
                 
-                <button className="btn btn-outline w-full justify-start">
+                <button className="btn btn-outline w-full justify-start" onClick={() => {
+                  // Redirect to courses page
+                  navigate('/courses');
+                }}>
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 19.5A2.5 2.5 0 01.5 17H6l4-4 4 4h5.5a2.5 2.5 0 01-2.5 2.5H4z" />
                   </svg>
-                  Download Data
+                  Explore Courses
                 </button>
                 
-                <button className="btn btn-outline btn-error w-full justify-start">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                  Delete Account
-                </button>
+           
               </div>
             </div>
           </div>

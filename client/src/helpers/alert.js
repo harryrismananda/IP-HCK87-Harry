@@ -12,12 +12,11 @@ export const showError = (err) => {
     text: message,
   })
 } 
-export const showSuccess = () => {
-
+export const showSuccess = (message = 'Operation completed successfully.') => {
   Swal.fire({
     icon: 'success',
     title: 'Success',
-    text: 'Operation completed successfully.',
+    text: message,
   })
 } 
 
@@ -34,5 +33,24 @@ export const successRegister = () => {
     icon: 'success',
     title: 'Registration Successful',
     text: 'You have successfully registered. Please login.',
+  })
+}
+
+export const successEnrollment = (languageName) => {
+  Swal.fire({
+    icon: 'success',
+    title: 'Enrollment Successful!',
+    text: `Welcome to your ${languageName} learning journey. You can now access all courses for this language.`,
+    confirmButtonText: 'Start Learning'
+  })
+}
+
+export const successProfilePicture = (message) => {
+  Swal.fire({
+    icon: 'success',
+    title: 'Profile Picture Updated!',
+    text: message || 'Your profile picture has been updated successfully.',
+    timer: 2000,
+    showConfirmButton: false
   })
 }

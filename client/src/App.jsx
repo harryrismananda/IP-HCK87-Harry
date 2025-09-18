@@ -11,10 +11,15 @@ import { CMSUserPage } from "./pages/CMSUserPage";
 import { CMSQuestionPage } from "./pages/CMSQuestionPage";
 import { UserCoursePage } from "./pages/UserCoursePage";
 import { CourseQuestionPage } from "./pages/CourseQuestionPage";
+import { CourseDetailPage } from "./pages/CourseDetailPage";
+import { PaymentPage } from "./pages/PaymentPage";
+import { Provider } from "react-redux";
+import { store } from "./store";
 
 function App() {
   return (
     <>
+    <Provider store={store} >
       <BrowserRouter>
         <Routes>
           <Route element={<AuthLayout />}>
@@ -25,7 +30,9 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/courses" element={<UserCoursePage />} />
-            <Route path="/course/:courseId/questions" element={<CourseQuestionPage />} />
+            <Route path="/course/:courseId" element={<CourseDetailPage />} />
+            <Route path="/courses/:languageId/questions" element={<CourseQuestionPage />} />
+            <Route path="/payment" element={<PaymentPage />} />
           </Route>
           <Route element={<CMSLayout />}>
             <Route path="/cms/home" element={<CMSHomePage />} />
@@ -34,6 +41,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+    </Provider>
     </>
   );
 }
