@@ -4,11 +4,7 @@ const {
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class UserProgress extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
+
     static associate(models) {
       UserProgress.belongsTo(models.User, { foreignKey: "userId" });
       UserProgress.belongsTo(models.Language, { foreignKey: "languageId" });  
@@ -22,6 +18,13 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'UserProgress',
+    indexes: [
+      {
+        unique: true,
+        fields: ['userId', 'languageId'],
+        name: 'unique_user_language_progress'
+      }
+    ]
   });
   return UserProgress;
 };

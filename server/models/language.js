@@ -15,8 +15,16 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Language.init({
-    name: DataTypes.STRING
-  }, {
+    name: {type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        notEmpty: { msg: "Language name is required" },
+        notNull: { msg: "Language name is required" },
+    }
+
+  }
+}, {
     sequelize,
     modelName: 'Language',
   });
