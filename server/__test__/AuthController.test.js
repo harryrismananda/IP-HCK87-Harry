@@ -248,6 +248,79 @@ describe('AuthController', () => {
       expect(response.body).toHaveProperty('message');
     });
 
+    it('should successfully authenticate with valid Google token and create new user', async () => {
+      // Mock Google OAuth2 client
+      const mockVerifyIdToken = jest.fn().mockResolvedValueOnce({
+        getPayload: () => ({
+          email: 'googleuser@example.com',
+          name: 'Google User'
+        })
+      });
+
+      // Mock the OAuth2 client directly by requiring it and mocking
+      const { OAuth2Client } = require('google-auth-library');
+      OAuth2Client.prototype.verifyIdToken = mockVerifyIdToken;
+
+      const response = await request(app)
+        .post('/google-login')
+        .send({ googleToken: 'valid-google-token' })
+        .expect(201); // New user created
+
+      expect(response.body).toHaveProperty('access_token');
+      expect(response.body).toHaveProperty('user_data');
+      expect(response.body.user_data).toHaveProperty('email', 'googleuser@example.com');
+      expect(response.body.user_data).toHaveProperty('fullName', 'Google User');
+
+      // Verify user was created in database
+      const user = await User.findOne({ where: { email: 'googleuser@example.com' } });
+      expect(user).toBeTruthy();
+      expect(user.fullName).toBe('Google User');
+    });
+
+    it('should successfully authenticate with valid Google token for existing user', async () => {
+      // Create existing user first
+      await User.create({
+        email: 'existinguser@example.com',
+        fullName: 'Existing User',
+        password: 'hashedpassword'
+      });
+
+      // Mock Google OAuth2 client
+      const mockVerifyIdToken = jest.fn().mockResolvedValueOnce({
+        getPayload: () => ({
+          email: 'existinguser@example.com',
+          name: 'Existing User Updated'
+        })
+      });
+
+      const { OAuth2Client } = require('google-auth-library');
+      OAuth2Client.prototype.verifyIdToken = mockVerifyIdToken;
+
+      const response = await request(app)
+        .post('/google-login')
+        .send({ googleToken: 'valid-google-token' })
+        .expect(200); // Existing user login
+
+      expect(response.body).toHaveProperty('access_token');
+      expect(response.body).toHaveProperty('user_data');
+      expect(response.body.user_data).toHaveProperty('email', 'existinguser@example.com');
+    });
+
+    it('should handle Google OAuth verification errors', async () => {
+      // Mock Google OAuth2 client to throw error
+      const mockVerifyIdToken = jest.fn().mockRejectedValueOnce(new Error('Invalid token'));
+
+      const { OAuth2Client } = require('google-auth-library');
+      OAuth2Client.prototype.verifyIdToken = mockVerifyIdToken;
+
+      const response = await request(app)
+        .post('/google-login')
+        .send({ googleToken: 'invalid-google-token' })
+        .expect(500);
+
+      expect(response.body).toHaveProperty('message', 'Internal server error!');
+    });
+
     // Note: Testing with a valid Google token would require mocking the OAuth2Client
     // which is complex and not recommended for unit tests. Integration tests with
     // valid tokens should be handled separately.
