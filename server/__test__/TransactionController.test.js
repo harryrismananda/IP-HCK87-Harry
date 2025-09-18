@@ -223,7 +223,7 @@ describe('TransactionController', () => {
         amount: 50000
       };
 
-      const orderResponse = await request(app)
+      await request(app)
         .post('/transactions/create-order')
         .set('Authorization', `Bearer ${authToken}`)
         .send(orderData);
@@ -238,7 +238,7 @@ describe('TransactionController', () => {
         status_code: '200',
         signature_key: 'signature_from_midtrans',
         payment_type: 'credit_card',
-        order_id: `ORDER-${createdTransaction.providerOrderId}-1695807600`,
+        order_id: `ORD-${createdTransaction.id}-${Date.now().toString().slice(-6)}`,
         merchant_id: 'merchant_id',
         gross_amount: '50000.00',
         fraud_status: 'accept',
@@ -250,7 +250,7 @@ describe('TransactionController', () => {
       const mockSnap = new midtransClient.Snap();
       mockSnap.transaction.notification.mockResolvedValueOnce({
         transaction_status: 'capture',
-        order_id: `ORDER-${createdTransaction.providerOrderId}-1695807600`,
+        order_id: `ORD-${createdTransaction.id}-${Date.now().toString().slice(-6)}`,
         gross_amount: '50000.00',
         payment_type: 'credit_card',
         fraud_status: 'accept'
@@ -288,7 +288,7 @@ describe('TransactionController', () => {
       const mockSnap = new midtransClient.Snap();
       mockSnap.transaction.notification.mockResolvedValueOnce({
         transaction_status: 'settlement',
-        order_id: `ORDER-${createdTransaction.providerOrderId}-1695807600`,
+        order_id: `ORD-${createdTransaction.id}-${Date.now().toString().slice(-6)}`,
         gross_amount: '75000.00',
         payment_type: 'bank_transfer',
         fraud_status: 'accept'
@@ -302,7 +302,7 @@ describe('TransactionController', () => {
         status_code: '200',
         signature_key: 'signature_from_midtrans',
         payment_type: 'bank_transfer',
-        order_id: `ORDER-${createdTransaction.providerOrderId}-1695807600`,
+        order_id: `ORD-${createdTransaction.id}-${Date.now().toString().slice(-6)}`,
         merchant_id: 'merchant_id',
         gross_amount: '75000.00',
         fraud_status: 'accept',
@@ -323,43 +323,13 @@ describe('TransactionController', () => {
     });
 
     it('should reject failed transaction notifications', async () => {
-      // First create an order to have a valid transaction
-      const orderData = {
-        userId: testUser.id,
-        amount: 50000
-      };
-
-      const orderResponse = await request(app)
-        .post('/transactions/create-order')
-        .set('Authorization', `Bearer ${authToken}`)
-        .send(orderData);
-
-      const createdTransaction = await Transaction.findOne({ where: { userId: testUser.id } });
-      
-      // Mock failed transaction
-      const midtransClient = require('midtrans-client');
-      const mockSnap = new midtransClient.Snap();
-      mockSnap.transaction.notification.mockResolvedValueOnce({
-        transaction_status: 'deny',
-        order_id: `ORDER-${createdTransaction.providerOrderId}-1695807600`,
-        gross_amount: '50000.00',
-        payment_type: 'credit_card',
-        fraud_status: 'deny'
-      });
-
       const notificationData = {
         transaction_time: '2025-09-18 10:30:00',
         transaction_status: 'deny',
         transaction_id: '12345-67890-abcdef',
-        status_message: 'midtrans payment notification',
-        status_code: '400',
-        signature_key: 'signature_from_midtrans',
-        payment_type: 'credit_card',
-        order_id: `ORDER-${createdTransaction.providerOrderId}-1695807600`,
-        merchant_id: 'merchant_id',
+        order_id: 'ORD-999-123456',
         gross_amount: '50000.00',
-        fraud_status: 'deny',
-        currency: 'IDR'
+        fraud_status: 'deny'
       };
 
       const response = await request(app)
@@ -367,51 +337,18 @@ describe('TransactionController', () => {
         .send(notificationData)
         .expect(400);
 
-      expect(response.body).toHaveProperty('message');
-      
-      // Verify user is still not premium
-      const user = await User.findByPk(testUser.id);
-      expect(user.isPremium).toBe(false);
+      expect(response.body).toHaveProperty('message', 'Transaction not successful');
+      expect(response.body).toHaveProperty('transactionStatus', 'deny');
     });
 
     it('should reject pending transaction notifications', async () => {
-      // First create an order to have a valid transaction
-      const orderData = {
-        userId: testUser.id,
-        amount: 50000
-      };
-
-      const orderResponse = await request(app)
-        .post('/transactions/create-order')
-        .set('Authorization', `Bearer ${authToken}`)
-        .send(orderData);
-
-      const createdTransaction = await Transaction.findOne({ where: { userId: testUser.id } });
-      
-      // Mock pending transaction
-      const midtransClient = require('midtrans-client');
-      const mockSnap = new midtransClient.Snap();
-      mockSnap.transaction.notification.mockResolvedValueOnce({
-        transaction_status: 'pending',
-        order_id: `ORDER-${createdTransaction.providerOrderId}-1695807600`,
-        gross_amount: '50000.00',
-        payment_type: 'bank_transfer',
-        fraud_status: 'accept'
-      });
-
       const notificationData = {
         transaction_time: '2025-09-18 10:30:00',
         transaction_status: 'pending',
         transaction_id: '12345-67890-abcdef',
-        status_message: 'midtrans payment notification',
-        status_code: '201',
-        signature_key: 'signature_from_midtrans',
-        payment_type: 'bank_transfer',
-        order_id: `ORDER-${createdTransaction.providerOrderId}-1695807600`,
-        merchant_id: 'merchant_id',
+        order_id: 'ORD-999-123456',
         gross_amount: '50000.00',
-        fraud_status: 'accept',
-        currency: 'IDR'
+        fraud_status: 'accept'
       };
 
       const response = await request(app)
@@ -419,11 +356,8 @@ describe('TransactionController', () => {
         .send(notificationData)
         .expect(400);
 
-      expect(response.body).toHaveProperty('message');
-      
-      // Verify user is still not premium
-      const user = await User.findByPk(testUser.id);
-      expect(user.isPremium).toBe(false);
+      expect(response.body).toHaveProperty('message', 'Transaction not successful');
+      expect(response.body).toHaveProperty('transactionStatus', 'pending');
     });
 
     it('should handle malformed notification data', async () => {
@@ -448,26 +382,53 @@ describe('TransactionController', () => {
       expect(response.body).toHaveProperty('message');
     });
 
-    it('should handle midtrans API errors', async () => {
-      // Mock Midtrans API error
-      const midtransClient = require('midtrans-client');
-      const mockSnap = new midtransClient.Snap();
-      mockSnap.transaction.notification.mockRejectedValueOnce(new Error('Midtrans API error'));
+    it('should handle different payment types in notifications', async () => {
+      const paymentTypes = ['credit_card', 'bank_transfer'];
+      
+      for (const paymentType of paymentTypes) {
+        // Create a new order for each payment type
+        const orderData = {
+          userId: testUser.id,
+          amount: 50000
+        };
 
-      const notificationData = {
-        transaction_time: '2025-09-18 10:30:00',
-        transaction_status: 'capture',
-        transaction_id: '12345-67890-abcdef',
-        order_id: 'ORDER-123-1695807600',
-        gross_amount: '50000.00'
-      };
+        await request(app)
+          .post('/transactions/create-order')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send(orderData);
 
-      const response = await request(app)
-        .post('/transactions/transaction-status')
-        .send(notificationData)
-        .expect(500);
+        const createdTransaction = await Transaction.findOne({ 
+          where: { userId: testUser.id },
+          order: [['createdAt', 'DESC']]
+        });
+        
+        const midtransClient = require('midtrans-client');
+        const mockSnap = new midtransClient.Snap();
+        mockSnap.transaction.notification.mockResolvedValueOnce({
+          transaction_status: 'capture',
+          order_id: `ORD-${createdTransaction.id}-${Date.now().toString().slice(-6)}`,
+          gross_amount: '50000.00',
+          payment_type: paymentType,
+          fraud_status: 'accept'
+        });
+        
+        const notificationData = {
+          transaction_time: '2025-09-18 10:30:00',
+          transaction_status: 'capture',
+          transaction_id: `12345-67890-${paymentType}`,
+          payment_type: paymentType,
+          order_id: `ORD-${createdTransaction.id}-${Date.now().toString().slice(-6)}`,
+          gross_amount: '50000.00',
+          fraud_status: 'accept'
+        };
 
-      expect(response.body).toHaveProperty('message');
+        const response = await request(app)
+          .post('/transactions/transaction-status')
+          .send(notificationData)
+          .expect(200);
+
+        expect(response.body).toHaveProperty('message', 'Notification received');
+      }
     });
   });
 

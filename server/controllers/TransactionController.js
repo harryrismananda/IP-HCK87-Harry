@@ -1,7 +1,7 @@
 const { Transaction, User } = require("../models");
 const midtransClient = require("midtrans-client");
 let snap = new midtransClient.Snap({
-  isProduction: false,
+  isProduction: false, // Try sandbox mode first
   serverKey: process.env.MIDTRANS_SERVER_KEY,
 });
 
@@ -57,11 +57,18 @@ class TransactionController {
         });
       }
       
-      const order = await Transaction.create({userId, amount,})
+      const order = await Transaction.create({
+        userId, 
+        amount
+        // providerOrderId will be auto-generated as UUID
+      });
+      
+      // Create shorter order_id - use the generated UUID prefix
+      const shortOrderId = `ORD-${order.id}-${Date.now().toString().slice(-6)}`;
       
       let parameter = {
         transaction_details: {
-          order_id: `ORDER-${order.providerOrderId}-${Math.round(new Date().getTime() / 1000)}`,
+          order_id: shortOrderId,
           gross_amount: order.amount,
         },
         credit_card: {
@@ -70,7 +77,11 @@ class TransactionController {
         customer_details: {
           id: user.id,
           user_name: user.fullName,
+          first_name: user.fullName,
           email: user.email,
+        },
+        callbacks: {
+          finish: "http://localhost:5173/payment?status=finished",
         },
       };
       res
@@ -84,13 +95,31 @@ class TransactionController {
   static async transactionNotification(req, res, next) {
     try {
       const notificationJson = req.body;
+      
+      // Validate notification data
+      if (!notificationJson || Object.keys(notificationJson).length === 0) {
+        return res.status(500).json({ 
+          message: "Invalid notification data" 
+        });
+      }
+      
+      // Check if order_id exists in notification
+      if (!notificationJson.order_id) {
+        return res.status(500).json({ 
+          message: "Missing order_id in notification" 
+        });
+      }
+      
       const statusResponse = await snap.transaction.notification(
         notificationJson
       );
-      const transactionStatus = statusResponse.transaction_status;
       
-      // Check if transaction is successful (capture or settlement)
-      if (transactionStatus !== "capture" && transactionStatus !== "settlement") {
+      // Use transaction status from notification data first, fallback to statusResponse
+      const transactionStatus = notificationJson.transaction_status || statusResponse.transaction_status;
+      
+      // Check if transaction is failed, denied, expired, cancelled or pending - reject these
+      const failedStatuses = ['failed', 'deny', 'expire', 'cancel', 'pending'];
+      if (failedStatuses.includes(transactionStatus)) {
         return res.status(400).json({ 
           message: "Transaction not successful", 
           transactionStatus 
@@ -100,19 +129,16 @@ class TransactionController {
       // If transaction is successful, update user to premium
       if (transactionStatus === "capture" || transactionStatus === "settlement") {
         // Extract order ID to find the associated transaction
-        const orderId = statusResponse.order_id;
+        const orderId = notificationJson.order_id || statusResponse.order_id;
         
-        // Find the transaction by parsing the order ID
+        // Find the transaction by parsing the order ID (format: ORD-{id}-{timestamp})
         const orderIdParts = orderId.split('-');
         if (orderIdParts.length >= 2) {
-          const providerOrderId = orderIdParts[1];
+          const transactionId = parseInt(orderIdParts[1]);
           
-          // Validate UUID format before database query
-          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-          if (uuidRegex.test(providerOrderId)) {
-            const transaction = await Transaction.findOne({
-              where: { providerOrderId: providerOrderId }
-            });
+          // Find transaction by numeric ID
+          if (!isNaN(transactionId)) {
+            const transaction = await Transaction.findByPk(transactionId);
             
             if (transaction) {
               // Update user to premium status

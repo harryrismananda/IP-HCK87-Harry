@@ -16,14 +16,28 @@ All endpoints may return the following error responses:
 ### Authentication Errors
 ```json
 {
-  "message": "Access token is required"
+  "message": "No authorization header"
 }
 ```
 **Status Code:** `401 Unauthorized`
 
 ```json
 {
-  "message": "Invalid token"
+  "message": "No token provided"
+}
+```
+**Status Code:** `401 Unauthorized`
+
+```json
+{
+  "message": "Invalid email or password"
+}
+```
+**Status Code:** `401 Unauthorized`
+
+```json
+{
+  "message": "Invalid Google token"
 }
 ```
 **Status Code:** `401 Unauthorized`
@@ -31,14 +45,14 @@ All endpoints may return the following error responses:
 ### Authorization Errors
 ```json
 {
-  "message": "Access denied. Admin only."
+  "message": "You are not authorized to access this resource"
 }
 ```
 **Status Code:** `403 Forbidden`
 
 ```json
 {
-  "message": "Premium access required"
+  "message": "You are not authorized to access this resource"
 }
 ```
 **Status Code:** `403 Forbidden`
@@ -58,10 +72,53 @@ All endpoints may return the following error responses:
 ```
 **Status Code:** `400 Bad Request`
 
+```json
+{
+  "message": "userId and amount are required"
+}
+```
+**Status Code:** `400 Bad Request`
+
+```json
+{
+  "message": "Parameter is required"
+}
+```
+**Status Code:** `400 Bad Request`
+
+```json
+{
+  "message": "Invalid parameter structure. transaction_details with order_id and gross_amount are required"
+}
+```
+**Status Code:** `400 Bad Request`
+
+### Conflict Errors
+```json
+{
+  "message": "You are already registered for this language!"
+}
+```
+**Status Code:** `409 Conflict`
+
 ### Not Found Errors
 ```json
 {
-  "message": "Resource not found"
+  "message": "User not found"
+}
+```
+**Status Code:** `404 Not Found`
+
+```json
+{
+  "message": "Course not found"
+}
+```
+**Status Code:** `404 Not Found`
+
+```json
+{
+  "message": "Language not found"
 }
 ```
 **Status Code:** `404 Not Found`
@@ -70,6 +127,20 @@ All endpoints may return the following error responses:
 ```json
 {
   "message": "Internal server error!"
+}
+```
+**Status Code:** `500 Internal Server Error`
+
+```json
+{
+  "message": "Invalid notification data"
+}
+```
+**Status Code:** `500 Internal Server Error`
+
+```json
+{
+  "message": "Missing order_id in notification"
 }
 ```
 **Status Code:** `500 Internal Server Error`
@@ -106,7 +177,7 @@ User login with email and password.
 
 **Error Responses:**
 - `400 Bad Request` - Missing email or password
-- `401 Unauthorized` - Invalid credentials
+- `401 Unauthorized` - Invalid email or password
 
 ---
 
@@ -116,7 +187,7 @@ User login with Google OAuth.
 **Request Body:**
 ```json
 {
-  "google_token": "google_oauth_token_here"
+  "googleToken": "google_oauth_token_here"
 }
 ```
 
@@ -309,7 +380,7 @@ Create user progress for a language.
 
 **Error Responses:**
 - `404 Not Found` - User not found
-- `409 Conflict` - User already registered for this language
+- `409 Conflict` - You are already registered for this language!
 - `401 Unauthorized` - Authentication required
 
 ---
@@ -469,6 +540,7 @@ Get specific language by ID.
 **Status Code:** `200 OK`
 
 **Error Responses:**
+- `400 Bad Request` - Invalid language ID format
 - `404 Not Found` - Language not found
 
 ---
@@ -497,7 +569,8 @@ Get all available courses.
 **Status Code:** `200 OK`
 
 **Error Responses:**
-- `403 Forbidden` - Premium access required
+- `401 Unauthorized` - Authentication required
+- `403 Forbidden` - You are not authorized to access this resource (non-premium users)
 
 ---
 
@@ -536,8 +609,8 @@ Get specific course by ID.
 **Status Code:** `200 OK`
 
 **Error Responses:**
-- `404 Not Found` - Course not found
 - `400 Bad Request` - Invalid course ID format
+- `404 Not Found` - Course not found
 
 ---
 
@@ -584,7 +657,7 @@ Get courses by language ID.
 ---
 
 ### POST /courses
-Create a new course using AI generation.
+Create a new course using AI generation (Staff only).
 
 **Request Body:**
 ```json
@@ -596,30 +669,34 @@ Create a new course using AI generation.
 **Success Response:**
 ```json
 {
-  "id": 2,
-  "title": "Spanish Fundamentals: Getting Started",
-  "difficulty": "Beginner",
-  "languageId": 2,
-  "content": {
-    "roadmap": "AI-generated course content...",
-    "lessons": [
-      {
-        "title": "Spanish Alphabet & Basic Pronunciation",
-        "content": "## El Alfabeto Español...",
-        "difficulty": 1,
-        "order": 1
-      }
-    ]
-  },
-  "createdAt": "2025-09-17T10:00:00.000Z",
-  "updatedAt": "2025-09-17T10:00:00.000Z"
+  "courses": [
+    {
+      "id": 2,
+      "title": "Spanish Fundamentals: Getting Started",
+      "difficulty": "Beginner",
+      "languageId": 2,
+      "content": {
+        "roadmap": "AI-generated course content...",
+        "lessons": [
+          {
+            "title": "Spanish Alphabet & Basic Pronunciation",
+            "content": "## El Alfabeto Español...",
+            "difficulty": 1,
+            "order": 1
+          }
+        ]
+      },
+      "createdAt": "2025-09-17T10:00:00.000Z",
+      "updatedAt": "2025-09-17T10:00:00.000Z"
+    }
+  ]
 }
 ```
 **Status Code:** `201 Created`
 
 **Error Responses:**
-- `400 Bad Request` - Validation errors
-- `500 Internal Server Error` - AI generation failed or language not found
+- `401 Unauthorized` - No authorization header
+- `403 Forbidden` - You are not authorized to access this resource
 
 ---
 
@@ -644,7 +721,7 @@ Create a new transaction order with Midtrans.
   "message": "Order created successfully",
   "parameter": {
     "transaction_details": {
-      "order_id": "ORDER-123-1695807600",
+      "order_id": "ORD-1-123456",
       "gross_amount": 50000
     },
     "credit_card": {
@@ -653,7 +730,11 @@ Create a new transaction order with Midtrans.
     "customer_details": {
       "id": 1,
       "user_name": "John Doe",
+      "first_name": "John Doe",
       "email": "user@example.com"
+    },
+    "callbacks": {
+      "finish": "http://localhost:5173/payment?status=finished"
     }
   }
 }
@@ -663,7 +744,7 @@ Create a new transaction order with Midtrans.
 **Error Responses:**
 - `401 Unauthorized` - Authentication required
 - `404 Not Found` - User not found
-- `400 Bad Request` - Missing required fields
+- `400 Bad Request` - userId and amount are required
 - `500 Internal Server Error` - Database or Midtrans error
 
 ---
@@ -702,7 +783,7 @@ Create Midtrans transaction token.
 
 **Error Responses:**
 - `401 Unauthorized` - Authentication required
-- `400 Bad Request` - Invalid parameter structure
+- `400 Bad Request` - Parameter is required or Invalid parameter structure. transaction_details with order_id and gross_amount are required
 - `500 Internal Server Error` - Midtrans API error
 
 ---
@@ -722,7 +803,7 @@ Handle Midtrans payment notification webhook.
   "status_code": "200",
   "signature_key": "signature_from_midtrans",
   "payment_type": "credit_card",
-  "order_id": "ORDER-123-1695807600",
+  "order_id": "ORD-1-123456",
   "merchant_id": "merchant_id",
   "gross_amount": "50000.00",
   "fraud_status": "accept",
@@ -740,8 +821,8 @@ Handle Midtrans payment notification webhook.
 **Status Code:** `200 OK`
 
 **Error Responses:**
-- `400 Bad Request` - Transaction not successful (status not capture/settlement)
-- `500 Internal Server Error` - Midtrans notification processing error
+- `400 Bad Request` - Transaction not successful (failed, deny, expire, cancel, pending statuses) or Missing order_id in notification
+- `500 Internal Server Error` - Invalid notification data or Midtrans notification processing error
 
 ---
 
@@ -790,8 +871,8 @@ Get specific question by ID.
   "courseId": 1,
   "choices": {
     "A": "B",
-    "B": "F",
-    "C": "I", 
+    "B": "F", 
+    "C": "I",
     "D": "T"
   },
   "answer": "C",
@@ -802,19 +883,24 @@ Get specific question by ID.
 **Status Code:** `200 OK`
 
 **Error Responses:**
-- `404 Not Found` - Question not found
-
----
+- `400 Bad Request` - Invalid question ID format
+- `404 Not Found` - Question not found---
 
 ### POST /questions
-Create a new question using AI generation.
+Create a new question.
 
 **Request Body:**
 ```json
 {
-  "text": "Generate questions for this course",
-  "answer": "Correct answer",
-  "courseId": 1
+  "questionName": "Which letter is a vowel?",
+  "answer": "C",
+  "courseId": 1,
+  "choices": {
+    "A": "B",
+    "B": "F",
+    "C": "I", 
+    "D": "T"
+  }
 }
 ```
 
@@ -822,15 +908,15 @@ Create a new question using AI generation.
 ```json
 {
   "id": 2,
-  "questionName": "AI-generated question text",
+  "questionName": "Which letter is a vowel?",
   "courseId": 1,
   "choices": {
-    "A": "Option A",
-    "B": "Option B", 
-    "C": "Option C",
-    "D": "Option D"
+    "A": "B",
+    "B": "F", 
+    "C": "I",
+    "D": "T"
   },
-  "answer": "A",
+  "answer": "C",
   "createdAt": "2025-09-17T10:00:00.000Z",
   "updatedAt": "2025-09-17T10:00:00.000Z"
 }
@@ -838,8 +924,10 @@ Create a new question using AI generation.
 **Status Code:** `201 Created`
 
 **Error Responses:**
-- `400 Bad Request` - Validation errors
-- `500 Internal Server Error` - AI generation failed
+- `400 Bad Request` - Text, answer, and courseId are required
+- `400 Bad Request` - Invalid courseId format
+- `401 Unauthorized` - No authorization header
+- `403 Forbidden` - You are not authorized to access this resource
 
 ---
 
@@ -892,13 +980,12 @@ Delete user (Admin only).
 ---
 
 ### POST /languages
-Create a new language (Admin only).
+Create a new language (Staff only).
 
 **Request Body:**
 ```json
 {
-  "name": "French",
-  "imageUrl": "https://example.com/french.jpg"
+  "name": "French"
 }
 ```
 
@@ -907,7 +994,6 @@ Create a new language (Admin only).
 {
   "id": 3,
   "name": "French",
-  "imageUrl": "https://example.com/french.jpg",
   "createdAt": "2025-09-17T10:00:00.000Z",
   "updatedAt": "2025-09-17T10:00:00.000Z"
 }
@@ -915,33 +1001,30 @@ Create a new language (Admin only).
 **Status Code:** `201 Created`
 
 **Error Responses:**
-- `403 Forbidden` - Admin access required
-- `400 Bad Request` - Validation errors
+- `401 Unauthorized` - No authorization header
+- `403 Forbidden` - You are not authorized to access this resource
 
 ---
 
 ### DELETE /languages/:id
-Delete language (Admin only).
+Delete language (Staff only).
 
 **Parameters:**
 - `id` (path parameter) - Language ID
 
 **Success Response:**
-```json
-{
-  "message": "Language deleted successfully"
-}
-```
-**Status Code:** `200 OK`
+- Status Code: `204 No Content`
 
 **Error Responses:**
-- `403 Forbidden` - Admin access required
+- `400 Bad Request` - Invalid language ID format
+- `401 Unauthorized` - No authorization header
+- `403 Forbidden` - You are not authorized to access this resource
 - `404 Not Found` - Language not found
 
 ---
 
 ### PUT /courses/:id
-Update course (Admin only).
+Update course (Staff only).
 
 **Parameters:**
 - `id` (path parameter) - Course ID
@@ -950,8 +1033,8 @@ Update course (Admin only).
 ```json
 {
   "title": "Updated Course Title",
-  "difficulty": "Intermediate",
-  "content": "{\"roadmap\":\"Updated content...\",\"lessons\":[...]}"
+  "description": "Updated description",
+  "languageId": 1
 }
 ```
 
@@ -960,7 +1043,7 @@ Update course (Admin only).
 {
   "id": 1,
   "title": "Updated Course Title",
-  "difficulty": "Intermediate",
+  "description": "Updated description",
   "languageId": 1,
   "content": "{\"roadmap\":\"Updated content...\",\"lessons\":[...]}",
   "createdAt": "2025-09-17T10:00:00.000Z",
@@ -970,34 +1053,30 @@ Update course (Admin only).
 **Status Code:** `200 OK`
 
 **Error Responses:**
-- `403 Forbidden` - Admin access required
+- `401 Unauthorized` - No authorization header
+- `403 Forbidden` - You are not authorized to access this resource
 - `404 Not Found` - Course not found
-- `400 Bad Request` - Validation errors
 
 ---
 
 ### DELETE /courses/:id
-Delete course (Admin only).
+Delete course (Staff only).
 
 **Parameters:**
 - `id` (path parameter) - Course ID
 
 **Success Response:**
-```json
-{
-  "message": "Course deleted successfully"
-}
-```
-**Status Code:** `200 OK`
+- Status Code: `204 No Content`
 
 **Error Responses:**
-- `403 Forbidden` - Admin access required
+- `401 Unauthorized` - No authorization header
+- `403 Forbidden` - You are not authorized to access this resource
 - `404 Not Found` - Course not found
 
 ---
 
 ### PUT /questions/:id
-Update question (Admin only).
+Update question (Staff only).
 
 **Parameters:**
 - `id` (path parameter) - Question ID
@@ -1005,14 +1084,9 @@ Update question (Admin only).
 **Request Body:**
 ```json
 {
-  "questionName": "Updated question text?",
-  "choices": {
-    "A": "Option A",
-    "B": "Option B",
-    "C": "Option C", 
-    "D": "Option D"
-  },
-  "answer": "A"
+  "text": "Updated question text?",
+  "answer": "A",
+  "courseId": 1
 }
 ```
 
@@ -1036,28 +1110,24 @@ Update question (Admin only).
 **Status Code:** `200 OK`
 
 **Error Responses:**
-- `403 Forbidden` - Admin access required
+- `401 Unauthorized` - No authorization header
+- `403 Forbidden` - You are not authorized to access this resource
 - `404 Not Found` - Question not found
-- `400 Bad Request` - Validation errors
 
 ---
 
 ### DELETE /questions/:id
-Delete question (Admin only).
+Delete question (Staff only).
 
 **Parameters:**
 - `id` (path parameter) - Question ID
 
 **Success Response:**
-```json
-{
-  "message": "Question deleted successfully"
-}
-```
-**Status Code:** `200 OK`
+- Status Code: `204 No Content`
 
 **Error Responses:**
-- `403 Forbidden` - Admin access required
+- `401 Unauthorized` - No authorization header
+- `403 Forbidden` - You are not authorized to access this resource
 - `404 Not Found` - Question not found
 
 ---
