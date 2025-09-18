@@ -217,6 +217,48 @@ describe('UserController', () => {
     });
   });
 
+  describe('PATCH /user/:id/profile', () => {
+    it('should return 400 when no file is uploaded', async () => {
+      const response = await request(app)
+        .patch(`/user/${testUser.id}/profile`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(400);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    it('should return 404 for non-existent user', async () => {
+      const nonExistentId = 99999;
+
+      const response = await request(app)
+        .patch(`/user/${nonExistentId}/profile`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .attach('imgUrl', Buffer.from('fake image data'), 'test.jpg')
+        .expect(404);
+
+      expect(response.body.message).toBe('User not found');
+    });
+
+    it('should return 401 for missing authentication', async () => {
+      const response = await request(app)
+        .patch(`/user/${testUser.id}/profile`)
+        .attach('imgUrl', Buffer.from('fake image data'), 'test.jpg')
+        .expect(401);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    it('should handle invalid file upload gracefully', async () => {
+      const response = await request(app)
+        .patch(`/user/${testUser.id}/profile`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .attach('imgUrl', Buffer.from(''), 'empty.jpg')
+        .expect([400, 500]);
+
+      expect(response.body).toHaveProperty('message');
+    });
+  });
+
   describe('POST /user/:id/progress', () => {
     it('should create user progress successfully', async () => {
       const progressData = {
