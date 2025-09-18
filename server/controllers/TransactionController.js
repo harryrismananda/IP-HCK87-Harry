@@ -112,15 +112,21 @@ class TransactionController {
           { status: "success" },
           { where: { providerOrderId: orderId } }
         );
-        await User.update({ isPremium: true }, { where: { id: transaction.userId } });
+        const user = await User.update({ isPremium: true }, { where: { id: transaction.userId } });
+        localStorage.removeItem('user_data');
+        req.user_data = {id:user.id, fullName:user.fullName, email:user.email, isPremium:true, role:user.role};
+        localStorage.setItem('user_data', JSON.stringify(user));
         return res.json({ message: `Transaction ${fraudStatus}` });
       }
     } else if (transactionStatus === "settlement") {
       const transaction = await Transaction.update(
         { status: "success" },
         { where: { providerOrderId: orderId } }
-      );
-      await User.update({ isPremium: true }, { where: { id: transaction.userId } });
+      ); 
+      const user = await User.update({ isPremium: true }, { where: { id: transaction.userId } });
+        localStorage.removeItem('user_data');
+        req.user_data = {id:user.id, fullName:user.fullName, email:user.email, isPremium:true, role:user.role};
+        localStorage.setItem('user_data', JSON.stringify(user));
       return res.json({ message: `Transaction ${fraudStatus}` });
     } else if (
       transactionStatus === "cancel" ||
