@@ -103,7 +103,7 @@ class TransactionController {
         notificationJson
       );
 
-      const orderId = statusResponse.order_id;
+      const orderId = statusResponse.order_id.split("-")[1]
       const transactionStatus = statusResponse.transaction_status;
       const fraudStatus = statusResponse.fraud_status;
 
@@ -112,22 +112,15 @@ class TransactionController {
       );
 
       // Sample transactionStatus handling logic
+      const transaction = await Transaction.findByPk(orderId);
       if (transactionStatus === "capture") {
         if (fraudStatus === "accept") {
           // ✅ set transaction status on your database to 'success'
-          const transaction = await Transaction.findOne({
-            where: { providerOrderId: orderId },
-          });
-          await Transaction.update(
-            { status: "success" },
-            { where: { providerOrderId: orderId } }
-          );
-          await User.update(
-            { isPremium: true },
-            { where: { id: transaction.userId } }
-          );
-          localStorage.removeItem("user_data");
+          await transaction.update(
+            { status: "success" });
           const user = await User.findByPk(transaction.userId);
+          await user.update({ isPremium: true },);
+          localStorage.removeItem("user_data");
           req.user_data = {
             id: user.id,
             fullName: user.fullName,
@@ -139,19 +132,12 @@ class TransactionController {
           return res.json({ message: `Transaction ${fraudStatus}` });
         }
       } else if (transactionStatus === "settlement") {
-         const transaction = await Transaction.findOne({
-            where: { providerOrderId: orderId },
-          });
-          await Transaction.update(
-            { status: "success" },
-            { where: { providerOrderId: orderId } }
-          );
-          await User.update(
-            { isPremium: true },
-            { where: { id: transaction.userId } }
-          );
-          localStorage.removeItem("user_data");
+         
+          await transaction.update(
+            { status: "success" });
           const user = await User.findByPk(transaction.userId);
+          await user.update({ isPremium: true },);
+          localStorage.removeItem("user_data");
           req.user_data = {
             id: user.id,
             fullName: user.fullName,
@@ -166,15 +152,13 @@ class TransactionController {
         transactionStatus === "deny" ||
         transactionStatus === "expire"
       ) {
-        await Transaction.update(
-          { status: "failure" },
-          { where: { providerOrderId: orderId } }
+        await transaction.update(
+          { status: "failure" }
         );
         return res.json({ message: `Transaction ${fraudStatus}` });
       } else if (transactionStatus === "pending") {
-        await Transaction.update(
-          { status: "pending" },
-          { where: { providerOrderId: orderId } }
+        await transaction.update(
+          { status: "pending" }
         );
         return res.json({ message: `Transaction ${fraudStatus}` });
       }
