@@ -935,6 +935,59 @@ Get all questions (can be filtered by courseId query parameter).
 
 ---
 
+### GET /questions/course/:courseId
+Get all questions for a specific course.
+
+**Parameters:**
+- `courseId` (path parameter) - Course ID (must be a valid integer)
+
+**Success Response:**
+```json
+[
+  {
+    "id": 1,
+    "questionName": "Which letter is a vowel?",
+    "courseId": 1,
+    "choices": {
+      "A": "B",
+      "B": "F", 
+      "C": "I",
+      "D": "T"
+    },
+    "answer": "C",
+    "createdAt": "2025-09-17T10:00:00.000Z",
+    "updatedAt": "2025-09-17T10:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "questionName": "What is JavaScript?",
+    "courseId": 1,
+    "choices": {
+      "A": "A programming language",
+      "B": "A coffee type",
+      "C": "A framework",
+      "D": "A library"
+    },
+    "answer": "A",
+    "createdAt": "2025-09-17T10:00:00.000Z",
+    "updatedAt": "2025-09-17T10:00:00.000Z"
+  }
+]
+```
+**Status Code:** `200 OK`
+
+**Notes:**
+- Returns an empty array `[]` if no questions exist for the specified course
+- All returned questions will have the same `courseId` as specified in the path parameter
+- Questions are returned in consistent order (database insertion order)
+
+**Error Responses:**
+- `400 Bad Request` - Invalid course ID format (courseId must be a valid integer)
+- `401 Unauthorized` - No authorization header
+- `500 Internal Server Error` - Database connection failed
+
+---
+
 ### GET /questions/:id
 Get specific question by ID.
 

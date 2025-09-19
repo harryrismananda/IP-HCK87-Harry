@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1758225804644" clover="3.2.0">
-  <project timestamp="1758225804645" name="All files">
-    <metrics statements="530" coveredstatements="479" conditionals="153" coveredconditionals="125" methods="56" coveredmethods="56" elements="739" coveredelements="660" complexity="0" loc="530" ncloc="530" packages="6" files="21" classes="21"/>
+<coverage generated="1758245398222" clover="3.2.0">
+  <project timestamp="1758245398222" name="All files">
+    <metrics statements="540" coveredstatements="488" conditionals="157" coveredconditionals="128" methods="57" coveredmethods="57" elements="754" coveredelements="673" complexity="0" loc="540" ncloc="540" packages="6" files="21" classes="21"/>
     <package name="server">
       <metrics statements="15" coveredstatements="15" conditionals="2" coveredconditionals="1" methods="0" coveredmethods="0"/>
       <file name="app.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\app.js">
@@ -24,7 +24,7 @@
       </file>
     </package>
     <package name="server.controllers">
-      <metrics statements="337" coveredstatements="292" conditionals="110" coveredconditionals="90" methods="30" coveredmethods="30"/>
+      <metrics statements="346" coveredstatements="300" conditionals="114" coveredconditionals="93" methods="31" coveredmethods="31"/>
       <file name="AuthController.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\controllers\AuthController.js">
         <metrics statements="45" coveredstatements="45" conditionals="14" coveredconditionals="14" methods="3" coveredmethods="3"/>
         <line num="1" count="6" type="stmt"/>
@@ -166,7 +166,7 @@
         <line num="57" count="6" type="stmt"/>
       </file>
       <file name="QuestionController.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\controllers\QuestionController.js">
-        <metrics statements="44" coveredstatements="42" conditionals="15" coveredconditionals="12" methods="5" coveredmethods="5"/>
+        <metrics statements="53" coveredstatements="50" conditionals="19" coveredconditionals="15" methods="6" coveredmethods="6"/>
         <line num="1" count="6" type="stmt"/>
         <line num="2" count="6" type="stmt"/>
         <line num="4" count="9" type="stmt"/>
@@ -182,35 +182,44 @@
         <line num="19" count="1" type="stmt"/>
         <line num="21" count="5" type="stmt"/>
         <line num="23" count="3" type="stmt"/>
-        <line num="27" count="13" type="stmt"/>
-        <line num="28" count="13" type="stmt"/>
-        <line num="30" count="13" type="cond" truecount="2" falsecount="0"/>
-        <line num="31" count="1" type="stmt"/>
-        <line num="34" count="12" type="cond" truecount="2" falsecount="3"/>
-        <line num="35" count="12" type="stmt"/>
-        <line num="38" count="0" type="stmt"/>
-        <line num="39" count="0" type="stmt"/>
-        <line num="41" count="13" type="stmt"/>
-        <line num="45" count="2" type="stmt"/>
-        <line num="46" count="2" type="stmt"/>
-        <line num="47" count="2" type="stmt"/>
-        <line num="48" count="2" type="stmt"/>
-        <line num="49" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="50" count="1" type="stmt"/>
-        <line num="52" count="1" type="stmt"/>
-        <line num="53" count="1" type="stmt"/>
-        <line num="54" count="1" type="stmt"/>
-        <line num="55" count="1" type="stmt"/>
-        <line num="56" count="1" type="stmt"/>
-        <line num="58" count="1" type="stmt"/>
+        <line num="27" count="9" type="stmt"/>
+        <line num="28" count="9" type="stmt"/>
+        <line num="29" count="9" type="cond" truecount="2" falsecount="0"/>
+        <line num="30" count="1" type="stmt"/>
+        <line num="32" count="8" type="stmt"/>
+        <line num="33" count="7" type="cond" truecount="1" falsecount="1"/>
+        <line num="34" count="0" type="stmt"/>
+        <line num="36" count="7" type="stmt"/>
+        <line num="38" count="2" type="stmt"/>
+        <line num="42" count="13" type="stmt"/>
+        <line num="43" count="13" type="stmt"/>
+        <line num="45" count="13" type="cond" truecount="2" falsecount="0"/>
+        <line num="46" count="1" type="stmt"/>
+        <line num="49" count="12" type="cond" truecount="2" falsecount="3"/>
+        <line num="50" count="12" type="stmt"/>
+        <line num="53" count="0" type="stmt"/>
+        <line num="54" count="0" type="stmt"/>
+        <line num="56" count="13" type="stmt"/>
+        <line num="60" count="2" type="stmt"/>
+        <line num="61" count="2" type="stmt"/>
         <line num="62" count="2" type="stmt"/>
         <line num="63" count="2" type="stmt"/>
-        <line num="64" count="2" type="stmt"/>
-        <line num="65" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="66" count="1" type="stmt"/>
+        <line num="64" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="65" count="1" type="stmt"/>
+        <line num="67" count="1" type="stmt"/>
         <line num="68" count="1" type="stmt"/>
         <line num="69" count="1" type="stmt"/>
+        <line num="70" count="1" type="stmt"/>
         <line num="71" count="1" type="stmt"/>
+        <line num="73" count="1" type="stmt"/>
+        <line num="77" count="2" type="stmt"/>
+        <line num="78" count="2" type="stmt"/>
+        <line num="79" count="2" type="stmt"/>
+        <line num="80" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="81" count="1" type="stmt"/>
+        <line num="83" count="1" type="stmt"/>
+        <line num="84" count="1" type="stmt"/>
+        <line num="86" count="1" type="stmt"/>
       </file>
       <file name="TransactionController.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\controllers\TransactionController.js">
         <metrics statements="60" coveredstatements="38" conditionals="26" coveredconditionals="15" methods="3" coveredmethods="3"/>
@@ -399,7 +408,7 @@
         <line num="4" count="6" type="stmt"/>
         <line num="5" count="12" type="stmt"/>
         <line num="7" count="6" type="stmt"/>
-        <line num="8" count="151" type="stmt"/>
+        <line num="8" count="160" type="stmt"/>
         <line num="10" count="6" type="stmt"/>
       </file>
     </package>
@@ -410,22 +419,22 @@
         <line num="1" count="6" type="stmt"/>
         <line num="2" count="6" type="stmt"/>
         <line num="3" count="6" type="stmt"/>
-        <line num="4" count="172" type="stmt"/>
-        <line num="5" count="172" type="stmt"/>
-        <line num="6" count="172" type="cond" truecount="2" falsecount="0"/>
-        <line num="7" count="18" type="stmt"/>
-        <line num="9" count="154" type="stmt"/>
-        <line num="10" count="154" type="cond" truecount="2" falsecount="0"/>
+        <line num="4" count="182" type="stmt"/>
+        <line num="5" count="182" type="stmt"/>
+        <line num="6" count="182" type="cond" truecount="2" falsecount="0"/>
+        <line num="7" count="19" type="stmt"/>
+        <line num="9" count="163" type="stmt"/>
+        <line num="10" count="163" type="cond" truecount="2" falsecount="0"/>
         <line num="11" count="3" type="stmt"/>
-        <line num="14" count="151" type="stmt"/>
-        <line num="15" count="151" type="cond" truecount="1" falsecount="1"/>
+        <line num="14" count="160" type="stmt"/>
+        <line num="15" count="160" type="cond" truecount="1" falsecount="1"/>
         <line num="16" count="0" type="stmt"/>
-        <line num="19" count="151" type="stmt"/>
-        <line num="20" count="149" type="cond" truecount="1" falsecount="1"/>
+        <line num="19" count="160" type="stmt"/>
+        <line num="20" count="158" type="cond" truecount="1" falsecount="1"/>
         <line num="21" count="0" type="stmt"/>
-        <line num="23" count="149" type="stmt"/>
-        <line num="24" count="149" type="stmt"/>
-        <line num="26" count="23" type="stmt"/>
+        <line num="23" count="158" type="stmt"/>
+        <line num="24" count="158" type="stmt"/>
+        <line num="26" count="24" type="stmt"/>
       </file>
       <file name="authorization.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\middlewares\authorization.js">
         <metrics statements="13" coveredstatements="11" conditionals="6" coveredconditionals="5" methods="2" coveredmethods="2"/>
@@ -446,8 +455,8 @@
       <file name="errorHandler.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\middlewares\errorHandler.js">
         <metrics statements="24" coveredstatements="23" conditionals="17" coveredconditionals="16" methods="1" coveredmethods="1"/>
         <line num="1" count="6" type="stmt"/>
-        <line num="2" count="92" type="stmt"/>
-        <line num="3" count="92" type="cond" truecount="11" falsecount="0"/>
+        <line num="2" count="95" type="stmt"/>
+        <line num="3" count="95" type="cond" truecount="11" falsecount="0"/>
         <line num="5" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
         <line num="8" count="17" type="stmt"/>
@@ -456,18 +465,18 @@
         <line num="12" count="1" type="stmt"/>
         <line num="16" count="5" type="cond" truecount="2" falsecount="0"/>
         <line num="17" count="5" type="stmt"/>
-        <line num="19" count="24" type="stmt"/>
-        <line num="20" count="24" type="stmt"/>
+        <line num="19" count="25" type="stmt"/>
+        <line num="20" count="25" type="stmt"/>
         <line num="23" count="2" type="cond" truecount="3" falsecount="1"/>
         <line num="24" count="0" type="stmt"/>
         <line num="26" count="2" type="stmt"/>
         <line num="28" count="2" type="stmt"/>
         <line num="30" count="10" type="stmt"/>
         <line num="31" count="10" type="stmt"/>
-        <line num="33" count="19" type="stmt"/>
-        <line num="34" count="19" type="stmt"/>
-        <line num="37" count="13" type="stmt"/>
-        <line num="38" count="13" type="stmt"/>
+        <line num="33" count="20" type="stmt"/>
+        <line num="34" count="20" type="stmt"/>
+        <line num="37" count="14" type="stmt"/>
+        <line num="38" count="14" type="stmt"/>
         <line num="42" count="6" type="stmt"/>
       </file>
     </package>
@@ -564,9 +573,9 @@
       </file>
     </package>
     <package name="server.routes">
-      <metrics statements="44" coveredstatements="44" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <metrics statements="45" coveredstatements="45" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <file name="index.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\routes\index.js">
-        <metrics statements="44" coveredstatements="44" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <metrics statements="45" coveredstatements="45" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="6" type="stmt"/>
         <line num="2" count="6" type="stmt"/>
         <line num="3" count="6" type="stmt"/>
@@ -599,9 +608,9 @@
         <line num="47" count="6" type="stmt"/>
         <line num="48" count="6" type="stmt"/>
         <line num="49" count="6" type="stmt"/>
-        <line num="52" count="6" type="stmt"/>
+        <line num="50" count="6" type="stmt"/>
         <line num="53" count="6" type="stmt"/>
-        <line num="56" count="6" type="stmt"/>
+        <line num="54" count="6" type="stmt"/>
         <line num="57" count="6" type="stmt"/>
         <line num="58" count="6" type="stmt"/>
         <line num="59" count="6" type="stmt"/>
@@ -610,7 +619,8 @@
         <line num="62" count="6" type="stmt"/>
         <line num="63" count="6" type="stmt"/>
         <line num="64" count="6" type="stmt"/>
-        <line num="66" count="6" type="stmt"/>
+        <line num="65" count="6" type="stmt"/>
+        <line num="67" count="6" type="stmt"/>
       </file>
     </package>
   </project>

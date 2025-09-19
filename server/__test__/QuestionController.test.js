@@ -215,6 +215,202 @@ describe('QuestionController', () => {
     });
   });
 
+  describe('GET /questions/course/:courseId - NEW ENDPOINT', () => {
+    it('should get questions by courseId successfully', async () => {
+      // Create additional questions for the same course
+      await Question.create({
+        courseId: testCourse.id,
+        questionName: 'What is JavaScript?',
+        choices: {
+          A: 'A programming language',
+          B: 'A coffee type',
+          C: 'A framework',
+          D: 'A library'
+        },
+        answer: 'A'
+      });
+
+      await Question.create({
+        courseId: testCourse.id,
+        questionName: 'Which is correct syntax?',
+        choices: {
+          A: 'var x = 5;',
+          B: 'variable x = 5;',
+          C: 'x := 5;',
+          D: 'int x = 5;'
+        },
+        answer: 'A'
+      });
+
+      const response = await request(app)
+        .get(`/questions/course/${testCourse.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBe(3); // testQuestion + 2 additional
+      
+      // All questions should belong to the same course
+      response.body.forEach(question => {
+        expect(question.courseId).toBe(testCourse.id);
+        expect(question).toHaveProperty('id');
+        expect(question).toHaveProperty('questionName');
+        expect(question).toHaveProperty('choices');
+        expect(question).toHaveProperty('answer');
+      });
+    });
+
+    it('should return empty array when no questions exist for courseId', async () => {
+      // Create another course with no questions
+      const emptyCourse = await Course.create({
+        languageId: testLanguage.id,
+        title: 'Empty Course',
+        difficulty: 'Beginner',
+        content: { roadmap: 'Empty roadmap', lessons: [] }
+      });
+
+      const response = await request(app)
+        .get(`/questions/course/${emptyCourse.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBe(0);
+    });
+
+    it('should return 400 for invalid courseId format', async () => {
+      const response = await request(app)
+        .get('/questions/course/invalid-course-id')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(400);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toBe('Invalid course ID format');
+    });
+
+    it('should return 401 for missing authentication', async () => {
+      const response = await request(app)
+        .get(`/questions/course/${testCourse.id}`)
+        .expect(401);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    it('should handle database errors gracefully', async () => {
+      // Mock database error
+      const originalFindAll = Question.findAll;
+      Question.findAll = jest.fn().mockRejectedValueOnce(new Error('Database connection failed'));
+
+      const response = await request(app)
+        .get(`/questions/course/${testCourse.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(500);
+
+      expect(response.body).toHaveProperty('message');
+
+      // Restore original method
+      Question.findAll = originalFindAll;
+    });
+
+    it('should filter questions by courseId correctly', async () => {
+      // Create another course
+      const anotherCourse = await Course.create({
+        languageId: testLanguage.id,
+        title: 'Another Course',
+        difficulty: 'Intermediate',
+        content: { roadmap: 'Another roadmap', lessons: [] }
+      });
+
+      // Create questions for both courses
+      await Question.create({
+        courseId: anotherCourse.id,
+        questionName: 'Question for another course?',
+        choices: { A: 'Option A', B: 'Option B', C: 'Option C', D: 'Option D' },
+        answer: 'B'
+      });
+
+      // Test first course
+      const response1 = await request(app)
+        .get(`/questions/course/${testCourse.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response1.body.length).toBe(1); // Only testQuestion
+      expect(response1.body[0].courseId).toBe(testCourse.id);
+
+      // Test second course
+      const response2 = await request(app)
+        .get(`/questions/course/${anotherCourse.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response2.body.length).toBe(1);
+      expect(response2.body[0].courseId).toBe(anotherCourse.id);
+      expect(response2.body[0].questionName).toBe('Question for another course?');
+    });
+
+    it('should handle questions with complex choices for specific course', async () => {
+      await Question.create({
+        courseId: testCourse.id,
+        questionName: 'Complex choices for this course?',
+        choices: {
+          A: 'Option with special chars: @#$%',
+          B: 'Option with unicode: 你好',
+          C: 'Option with HTML: <strong>Bold</strong>',
+          D: 'Option with newlines:\nLine 1\nLine 2'
+        },
+        answer: 'C'
+      });
+
+      const response = await request(app)
+        .get(`/questions/course/${testCourse.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body.length).toBe(2); // testQuestion + complex question
+      const complexQuestion = response.body.find(q => q.questionName === 'Complex choices for this course?');
+      expect(complexQuestion).toBeTruthy();
+      expect(complexQuestion.courseId).toBe(testCourse.id);
+      expect(complexQuestion.choices.A).toContain('@#$%');
+      expect(complexQuestion.choices.B).toContain('你好');
+      expect(complexQuestion.choices.C).toContain('<strong>');
+      expect(complexQuestion.choices.D).toContain('\n');
+    });
+
+    it('should return questions in consistent order for same courseId', async () => {
+      // Create multiple questions
+      const questionPromises = [];
+      for (let i = 1; i <= 5; i++) {
+        questionPromises.push(Question.create({
+          courseId: testCourse.id,
+          questionName: `Ordered question ${i}?`,
+          choices: { A: `Option A${i}`, B: `Option B${i}`, C: `Option C${i}`, D: `Option D${i}` },
+          answer: 'A'
+        }));
+      }
+      await Promise.all(questionPromises);
+
+      // Make multiple requests and verify consistency
+      const response1 = await request(app)
+        .get(`/questions/course/${testCourse.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      const response2 = await request(app)
+        .get(`/questions/course/${testCourse.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response1.body.length).toBe(6); // testQuestion + 5 ordered questions
+      expect(response2.body.length).toBe(6);
+      
+      // Verify same order
+      for (let i = 0; i < response1.body.length; i++) {
+        expect(response1.body[i].id).toBe(response2.body[i].id);
+      }
+    });
+  });
+
   // UNUSED ENDPOINTS - These endpoints exist but are not used by the client
   describe('GET /questions/:id - UNUSED ENDPOINT', () => {
     it('should get question by id successfully', async () => {

@@ -45,6 +45,7 @@ router.get(`/courses/:id`, CourseController.getCourseById) //some are preemium
 
 //questions routes
 router.get(`/questions`, QuestionController.getAllQuestions) //for a particular course, not every question
+router.get(`/questions/course/:courseId`, QuestionController.getQuestionByCourseId)
 router.get(`/questions/:id`, QuestionController.getQuestionById)
 router.post(`/questions`,  QuestionController.createQuestion)
 
