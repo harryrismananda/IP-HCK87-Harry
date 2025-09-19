@@ -50,13 +50,6 @@ All endpoints may return the following error responses:
 ```
 **Status Code:** `403 Forbidden`
 
-```json
-{
-  "message": "You are not authorized to access this resource"
-}
-```
-**Status Code:** `403 Forbidden`
-
 ### Validation Errors
 ```json
 {
@@ -93,12 +86,39 @@ All endpoints may return the following error responses:
 ```
 **Status Code:** `400 Bad Request`
 
+### Database Errors
+```json
+{
+  "message": "Internal server error!"
+}
+```
+**Status Code:** `500 Internal Server Error`
+
 ### Conflict Errors
 ```json
 {
   "message": "You are already registered for this language!"
 }
 ```
+**Status Code:** `409 Conflict`
+
+### Not Found Errors
+```json
+{
+  "message": "User not found"
+}
+```
+**Status Code:** `404 Not Found`
+
+```json
+{
+  "message": "Course not found"
+}
+```
+**Status Code:** `404 Not Found`
+
+### Transaction-Specific Error Handling
+For transaction endpoints, particularly webhook notifications, the API follows Midtrans best practices by always returning HTTP 200 status codes to prevent infinite retry loops. Error conditions are handled gracefully with descriptive messages while maintaining webhook stability.
 **Status Code:** `409 Conflict`
 
 ### Not Found Errors
@@ -742,10 +762,11 @@ Create a new transaction order with Midtrans.
 **Status Code:** `200 OK`
 
 **Error Responses:**
-- `401 Unauthorized` - Authentication required
-- `404 Not Found` - User not found
-- `400 Bad Request` - userId and amount are required
-- `500 Internal Server Error` - Database or Midtrans error
+- `401 Unauthorized` - No authorization header, No token provided, or Invalid token
+- `404 Not Found` - User not found with the provided userId
+- `400 Bad Request` - Missing required fields (userId and amount are required)
+- `400 Bad Request` - Invalid data types or values (e.g., negative amounts, zero amounts, or extremely large amounts)
+- `500 Internal Server Error` - Database connection errors, User.findByPk errors, or other server-side issues
 
 ---
 
@@ -782,9 +803,13 @@ Create Midtrans transaction token.
 **Status Code:** `200 OK`
 
 **Error Responses:**
-- `401 Unauthorized` - Authentication required
-- `400 Bad Request` - Parameter is required or Invalid parameter structure. transaction_details with order_id and gross_amount are required
-- `500 Internal Server Error` - Midtrans API error
+- `401 Unauthorized` - No authorization header, No token provided, or Invalid token
+- `400 Bad Request` - Parameter is required
+- `400 Bad Request` - Invalid parameter structure. transaction_details with order_id and gross_amount are required
+- `400 Bad Request` - Missing transaction_details.order_id
+- `400 Bad Request` - Missing transaction_details.gross_amount
+- `400 Bad Request` - Completely missing transaction_details object
+- `500 Internal Server Error` - Midtrans service unavailable or API errors
 
 ---
 
@@ -811,18 +836,71 @@ Handle Midtrans payment notification webhook.
 }
 ```
 
-**Success Response:**
+**Success Response Examples:**
+
+**Successful Payment (capture/settlement with accept fraud status):**
 ```json
 {
-  "message": "Notification received",
-  "transactionStatus": "capture"
+  "message": "Transaction accept"
 }
 ```
 **Status Code:** `200 OK`
 
+**Transaction Denied/Cancelled/Expired:**
+```json
+{
+  "message": "Transaction reject"
+}
+```
+**Status Code:** `200 OK`
+
+**Pending Transaction:**
+```json
+{
+  "message": "Transaction challenge"
+}
+```
+**Status Code:** `200 OK`
+
+**Settlement without fraud status:**
+```json
+{
+  "message": "Transaction undefined"
+}
+```
+**Status Code:** `200 OK`
+
+**Unknown/Unhandled Transaction Status:**
+```json
+{
+  "message": "Notification received"
+}
+```
+**Status Code:** `200 OK`
+
+**Database/Processing Error (always returns 200 to prevent Midtrans retries):**
+```json
+{
+  "message": "Notification received but error occurred"
+}
+```
+**Status Code:** `200 OK`
+
+**Transaction Status Handling:**
+- `capture` with `fraud_status: "accept"` → User upgraded to premium, transaction marked as success
+- `settlement` → User upgraded to premium, transaction marked as success
+- `deny`, `cancel`, `expire` → Transaction marked as failure
+- `pending` → Transaction remains pending
+- Unknown statuses → Acknowledged but no action taken
+
 **Error Responses:**
-- `400 Bad Request` - Transaction not successful (failed, deny, expire, cancel, pending statuses) or Missing order_id in notification
-- `500 Internal Server Error` - Invalid notification data or Midtrans notification processing error
+- `200 OK` - Even in error cases, returns 200 to prevent Midtrans retry loops
+- Missing order_id: Returns acknowledgment with "Notification received" message
+- Invalid notification data: Returns acknowledgment to prevent endless retries
+- Database errors: Returns "Notification received but error occurred" message
+- Malformed request body: Returns acknowledgment message
+
+> **Important:** This endpoint always returns HTTP 200 status codes to prevent Midtrans from retrying failed notifications indefinitely. Error conditions are handled gracefully and logged server-side.
 
 ---
 
@@ -854,6 +932,59 @@ Get all questions (can be filtered by courseId query parameter).
 ]
 ```
 **Status Code:** `200 OK`
+
+---
+
+### GET /questions/course/:courseId
+Get all questions for a specific course.
+
+**Parameters:**
+- `courseId` (path parameter) - Course ID (must be a valid integer)
+
+**Success Response:**
+```json
+[
+  {
+    "id": 1,
+    "questionName": "Which letter is a vowel?",
+    "courseId": 1,
+    "choices": {
+      "A": "B",
+      "B": "F", 
+      "C": "I",
+      "D": "T"
+    },
+    "answer": "C",
+    "createdAt": "2025-09-17T10:00:00.000Z",
+    "updatedAt": "2025-09-17T10:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "questionName": "What is JavaScript?",
+    "courseId": 1,
+    "choices": {
+      "A": "A programming language",
+      "B": "A coffee type",
+      "C": "A framework",
+      "D": "A library"
+    },
+    "answer": "A",
+    "createdAt": "2025-09-17T10:00:00.000Z",
+    "updatedAt": "2025-09-17T10:00:00.000Z"
+  }
+]
+```
+**Status Code:** `200 OK`
+
+**Notes:**
+- Returns an empty array `[]` if no questions exist for the specified course
+- All returned questions will have the same `courseId` as specified in the path parameter
+- Questions are returned in consistent order (database insertion order)
+
+**Error Responses:**
+- `400 Bad Request` - Invalid course ID format (courseId must be a valid integer)
+- `401 Unauthorized` - No authorization header
+- `500 Internal Server Error` - Database connection failed
 
 ---
 

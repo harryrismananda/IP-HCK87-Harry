@@ -1,6 +1,6 @@
 
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import http from "../helpers/http";
@@ -12,16 +12,20 @@ export const HomePage = () => {
   const dispatch = useDispatch();
   
   // Redux state
-  const { data: languages, loading: languagesLoading } = useSelector(state => state.language);
+  const { data: languages } = useSelector(state => state.language);
   
   // Local state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    dispatch(fetchLanguage());
-  }, [dispatch]);
+  // Only fetch languages when modal is opened, not on component mount
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+    if (languages.length === 0) {
+      dispatch(fetchLanguage());
+    }
+  };
 
   const handleEnrollment = async (languageId) => {
     // Prevent multiple simultaneous enrollments
@@ -83,7 +87,7 @@ export const HomePage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <button 
                 className="btn btn-primary btn-lg px-8 text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-                onClick={() => !loading && setIsModalOpen(true)}
+                onClick={() => !loading && handleOpenModal()}
                 disabled={loading}
               >
                 Start Learning Today
@@ -235,7 +239,7 @@ export const HomePage = () => {
             </p>
             <button 
               className="btn btn-accent btn-lg px-8 text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-              onClick={() => !loading && setIsModalOpen(true)}
+              onClick={() => !loading && handleOpenModal()}
               disabled={loading}
             >
               Get Started for Free

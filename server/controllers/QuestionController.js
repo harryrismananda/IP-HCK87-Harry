@@ -23,6 +23,21 @@ module.exports = class QuestionController {
       next(err);
     }
   }
+  static async getQuestionByCourseId(req, res, next) {
+    try {
+      const { courseId } = req.params;  
+      if (isNaN(Number(courseId))) {
+        throw { name: "Bad Request", message: "Invalid course ID format" };
+      }
+      const questions = await Question.findAll({ where: { courseId } });
+      if (!questions) {
+        throw { name: "NotFound", message: "Questions not found" };
+      }
+      res.status(200).json(questions);
+    } catch (err) {
+      next(err);
+    }
+  }
   static async createQuestion(req, res, next) {
     try {
       const { questionName, answer, courseId, choices } = req.body;  
