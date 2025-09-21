@@ -57,41 +57,115 @@ class CourseController {
       const response = await ai.models.generateContent({
         model: "gemini-1.5-pro",
         contents: `
-Role: You are a certified ${foundLanguage.name} teacher. 
-Instructions: 
-1. Create 3 structured courses (1 Beginner, 1 Intermediate, 1 Advanced). 
-   Each course must include:
-     - "title": Course name,
-     - "difficulty": Beginner | Intermediate | Advanced,
-     - "languageId": ${foundLanguage.id},
-     - "content": {
-          "roadmap": High-level learning plan,
-          "lessons":[
-            { "title": "...", "content": "create in markdown format, not just short text or description but an entire lesson content, content format should be similar compared to this resource https://www.ef.com/wwen/english-resources/english-grammar/noun-gender/", "difficulty": 1|2|3, "order": 1|2|3... },]
-       }
-2. For each course, generate 5 multiple-choice questions.
-   Each question must include:
-     - "questionName"
-     - "choices": {A: "...", B: "...", C: "...", D: "..."}
-     - "answer": correct option (A/B/C/D)
-   Ensure questions cover the subtopics of the course.
-   Do not return null or empty values.
-3. Format Output: Return ONLY JSON in this format:
-   {
-     "courses": [ {course1}, {course2}, {course3} ]
-   }
-4. Ensure the JSON is valid and parsable.
-5. Fill all the checklist before generating the output:
-        [ ] Total count of courses generated = 3?
-        [ ] Courses has different difficulties?
-        [ ] Total questions generated = 5 for each courses?
-        [ ] Courses generated has no null value?
-        [ ] Questions generated has no null value?
-        [ ] Courses generated has valid JSON format with strict equality?
-        [ ] Questions generated has valid JSON format with strict equality?
-        [ ] Course content is in markdown format?
-        [ ] Course content format is similar to the example resource, not just a single one liner description?
-6. If there is ONE checklist from instruction no. 5 that is not filled, re-iterate until everything is filled (IMPORTANT!)
+# Language Course Generation Prompt
+
+You are a certified ${foundLanguage.name} teacher tasked with creating comprehensive language courses.
+
+## Task Requirements
+
+Create exactly 3 structured courses with the following specifications:
+
+### Course Structure
+Each course MUST contain:
+- **title**: Descriptive course name
+- **difficulty**: One of "Beginner", "Intermediate", or "Advanced"
+- **languageId**: ${foundLanguage.id}
+- **content**: Object containing:
+  - **roadmap**: Detailed 3-4 sentence learning plan overview
+  - **lessons**: Array of lesson objects, each with:
+    - **title**: Lesson name
+    - **content**: Complete lesson in markdown format (minimum 500 words, structured like https://www.ef.com/wwen/english-resources/english-grammar/noun-gender/ with explanations, examples, and practice)
+    - **difficulty**: Numeric value (1 for Beginner, 2 for Intermediate, 3 for Advanced)
+    - **order**: Sequential lesson number (1, 2, 3, etc.)
+
+### Question Structure
+For each course, create exactly 5 multiple-choice questions:
+- **questionName**: Clear question text
+- **choices**: Object with keys A, B, C, D and corresponding answer options
+- **answer**: Single letter (A, B, C, or D) indicating correct answer
+
+## Content Guidelines
+
+1. **Lesson Content Requirements**:
+   - Write in markdown format with proper headers, lists, and formatting
+   - Include detailed explanations with multiple examples
+   - Provide context and usage scenarios
+   - Add practice exercises or example sentences
+   - Minimum 500 words per lesson
+   - Structure similar to professional language learning resources
+
+2. **Course Progression**:
+   - Beginner: 3-4 lessons covering fundamentals
+   - Intermediate: 4-5 lessons building on basics
+   - Advanced: 4-5 lessons with complex concepts
+
+3. **Questions**:
+   - Cover different aspects of each course
+   - Test comprehension, application, and analysis
+   - Vary in difficulty appropriate to course level
+   - Include distractors that are plausible but incorrect
+
+## Output Format
+
+Return ONLY valid JSON in this exact structure:
+
+json
+{
+  "courses": [
+    {
+      "title": "Course Title",
+      "difficulty": "Beginner",
+      "languageId": ${foundLanguage.id},
+      "content": {
+        "roadmap": "Comprehensive learning plan description...",
+        "lessons": [
+          {
+            "title": "Lesson Title",
+            "content": "# Lesson Title\n\nDetailed markdown content...",
+            "difficulty": 1,
+            "order": 1
+          }
+        ]
+      },
+      "questions": [
+        {
+          "questionName": "Question text?",
+          "choices": {
+            "A": "Option A",
+            "B": "Option B", 
+            "C": "Option C",
+            "D": "Option D"
+          },
+          "answer": "A"
+        }
+      ]
+    }
+  ]
+}
+
+
+## Quality Checklist
+
+Before submitting, verify:
+- [ ] Exactly 3 courses generated
+- [ ] One course each: Beginner, Intermediate, Advanced
+- [ ] Each course has exactly 5 questions
+- [ ] No null, undefined, or empty values anywhere
+- [ ] All lesson content is substantial markdown (500+ words)
+- [ ] JSON is valid and properly formatted
+- [ ] All required fields are present
+- [ ] Questions test course material comprehensively
+- [ ] Content is educationally sound and progressive
+
+## Important Notes
+
+- Focus on creating high-quality, educational content
+- Ensure JSON syntax is perfect (no trailing commas, proper quotes)
+- Make lessons comprehensive and engaging
+- Questions should genuinely test understanding
+- All content must be complete - no placeholders or abbreviated sections
+
+Generate the complete course structure now.
         `,
       });
       const clean = response.text.replace(/```json|```/g, "").trim();
