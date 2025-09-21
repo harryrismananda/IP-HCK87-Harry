@@ -17,8 +17,8 @@ export const CourseDetailPage = () => {
   const [isRegistered, setIsRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [expandedLessons, setExpandedLessons] = useState({});
-  const [userPremiumStatus, setUserPremiumStatus] = useState(false);
-
+  const [userPremiumStatus, setUserPremiumStatus] = useState(false); //di pindah ke redux mungkin?
+  
   useEffect(() => {
     if (!courseId) return;
     
@@ -29,8 +29,8 @@ export const CourseDetailPage = () => {
     dispatch(fetchCourseDetail(courseId));
 
     // Get user premium status from localStorage
-    const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-    setUserPremiumStatus(userData.status || false);
+    const userData = JSON.parse(localStorage.getItem('user_data'));
+    setUserPremiumStatus(userData.isPremium || false);
   }, [courseId, dispatch]);
 
   // Check user registration when course data is loaded

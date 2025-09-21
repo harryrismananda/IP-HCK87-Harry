@@ -16,6 +16,7 @@ export const UserCoursePage = () => {
   useEffect(() => {
     fetchLanguages();
     fetchUserProgress();
+    fetchAllCourses()
     setLoading(false); // Only load languages initially
   }, []);
 
@@ -96,12 +97,25 @@ export const UserCoursePage = () => {
     }
   };
 
+  const fetchAllCourses = async () => {
+    try {
+      const response = await http({
+        method: "GET",
+        url:`/courses`,
+        headers: {Authorization: `Bearer ${localStorage.access_token}`}
+      })
+      setCourses(response.data)
+    } catch (error) {
+      showError(error)
+    }
+  }
+  // console.log(courses)
   const handleLanguageSelect = (languageId) => {
     setSelectedLanguage(languageId);
     if (languageId !== "all") {
       fetchCoursesByLanguage(languageId);
     } else {
-      setCourses([]); // Clear courses when "all" is selected
+      fetchAllCourses()
     }
   };
 
@@ -132,7 +146,7 @@ export const UserCoursePage = () => {
   };
 
   const filteredCourses = courses; // No client-side filtering needed since we fetch by language
-
+  // console.log(filteredCourses)
   const getLanguageName = (languageId) => {
     const language = languages.find(lang => lang.id === languageId);
     return language?.name || 'Unknown';
@@ -273,14 +287,123 @@ export const UserCoursePage = () => {
               <span className="loading loading-spinner loading-lg text-primary"></span>
               <p className="mt-4 text-lg">Loading courses...</p>
             </div>
-          ) : selectedLanguage === "all" ? (
-            <div className="text-center py-16">
-              <div className="text-6xl mb-4">🌍</div>
-              <h3 className="text-2xl font-bold mb-2">Select a Language</h3>
-              <p className="text-base-content/60">
-                Choose a specific language above to see available courses. This helps us provide you with targeted learning content.
-              </p>
+          ) : null}
+
+
+          {selectedLanguage === "all" ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              {filteredCourses.map((course) => {
+                const courseContent = parseCourseContent(course.content);
+                const lessonCount = courseContent.lessons?.length || 0;
+                
+                return (
+                  <div key={course.id} className="card bg-base-200 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
+                    <div className="card-body p-6">
+                      {/* Course Header */}
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-2xl">
+                            {getDifficultyIcon(course.difficulty)}
+                          </span>
+                          <span className="badge badge-outline">
+                            {getLanguageName(course.languageId)}
+                          </span>
+                          {isUserRegisteredForLanguage(course.languageId) && (
+                            <span className="badge badge-success badge-sm">
+                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Registered
+                            </span>
+                          )}
+                        </div>
+                        <span className={`badge ${getDifficultyColor(course.difficulty)}`}>
+                          {course.difficulty}
+                        </span>
+                      </div>
+
+                      {/* Course Title */}
+                      <h3 className="card-title text-xl mb-3 leading-tight">
+                        {course.title}
+                      </h3>
+
+                      {/* Course Description */}
+                      <p className="text-base-content/70 text-sm leading-relaxed mb-4 line-clamp-3">
+                        {courseContent.roadmap || 'Comprehensive course designed to enhance your language skills.'}
+                      </p>
+
+                      {/* Course Stats */}
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center space-x-4 text-sm text-base-content/60">
+                          <div className="flex items-center space-x-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            <span>{lessonCount} lessons</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>{lessonCount * 15} min</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Lessons Preview */}
+                      {courseContent.lessons && courseContent.lessons.length > 0 && (
+                        <div className="mb-6">
+                          <h4 className="font-semibold text-sm mb-2">Course Contents:</h4>
+                          <div className="space-y-1">
+                            {courseContent.lessons.slice(0, 3).map((lesson, index) => (
+                              <div key={index} className="text-xs text-base-content/60 flex items-center space-x-2">
+                                <span className="w-4 h-4 bg-primary/20 rounded-full flex items-center justify-center text-[10px] font-bold">
+                                  {lesson.order || index + 1}
+                                </span>
+                                <span className="truncate">{lesson.title}</span>
+                              </div>
+                            ))}
+                            {courseContent.lessons.length > 3 && (
+                              <div className="text-xs text-base-content/40">
+                                +{courseContent.lessons.length - 3} more lessons...
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action Button */}
+                      <div className="card-actions justify-end">
+                        {(() => {
+                          const button = getActionButton(course);
+                          return (
+                            <button 
+                              className={button.className}
+                              onClick={button.action}
+                              disabled={button.disabled}
+                            >
+                              {button.text}
+                              {!button.disabled && (
+                                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                              )}
+                            </button>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
+            // <div className="text-center py-16">
+            //   <div className="text-6xl mb-4">🌍</div>
+            //   <h3 className="text-2xl font-bold mb-2">Select a Language</h3>
+            //   <p className="text-base-content/60">
+            //     Choose a specific language above to see available courses. This helps us provide you with targeted learning content.
+            //   </p>
+            // </div>
           ) : filteredCourses.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">📚</div>
