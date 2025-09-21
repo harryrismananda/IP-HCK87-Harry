@@ -25,7 +25,7 @@ class AuthController {
      
       const access_token = generateToken({ id: user.id, email: user.email });
       req.access_token = access_token;
-      const user_data = { id: user.id, email: user.email, fullName: user.fullName, role:user.role, status:user.isPremium };
+      const user_data = { id: user.id, email: user.email, fullName: user.fullName, role:user.role, isPremium:user.isPremium };
       req.user_data = user_data;
       res.status(200).json({ access_token: req.access_token, user_data:req.user_data });
     } catch (err) {

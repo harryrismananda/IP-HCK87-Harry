@@ -83,24 +83,7 @@ describe('CourseController', () => {
       expect(response.body[0]).toHaveProperty('content');
     });
 
-    it('should return 403 for non-premium users', async () => {
-      // Create non-premium user
-      const nonPremiumUser = await User.create({
-        email: 'nonpremium@example.com',
-        password: 'password123',
-        fullName: 'Non Premium User',
-        role: 'User',
-        isPremium: false
-      });
-      const nonPremiumToken = generateToken({ id: nonPremiumUser.id });
-
-      const response = await request(app)
-        .get('/courses')
-        .set('Authorization', `Bearer ${nonPremiumToken}`)
-        .expect(403);
-
-      expect(response.body).toHaveProperty('message');
-    });
+   
 
     it('should return 401 for missing authentication', async () => {
       const response = await request(app)

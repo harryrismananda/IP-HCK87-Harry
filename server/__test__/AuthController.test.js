@@ -143,7 +143,7 @@ describe('AuthController', () => {
       expect(response.body.user_data).toHaveProperty('id');
       expect(response.body.user_data).toHaveProperty('fullName');
       expect(response.body.user_data).toHaveProperty('role');
-      expect(response.body.user_data).toHaveProperty('status');
+      expect(response.body.user_data).toHaveProperty('isPremium');
     });
 
     it('should return 400 for missing email', async () => {

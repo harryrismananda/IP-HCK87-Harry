@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">63.33% </span>
+                <span class="strong">67.85% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>38/60</span>
+                <span class='fraction'>38/56</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">63.33% </span>
+                <span class="strong">67.85% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>38/60</span>
+                <span class='fraction'>38/56</span>
             </div>
         
             
@@ -428,25 +428,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -454,6 +438,22 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -671,7 +671,7 @@ class TransactionController {
             { status: "success" });
           const user = <span class="cstat-no" title="statement not covered" >await User.findByPk(transaction.userId);</span>
 <span class="cstat-no" title="statement not covered" >          await user.update({ isPremium: true },);</span>
-<span class="cstat-no" title="statement not covered" >          localStorage.removeItem("user_data");</span>
+          // localStorage.removeItem("user_data");
 <span class="cstat-no" title="statement not covered" >          req.user_data = {</span>
             id: user.id,
             fullName: user.fullName,
@@ -679,7 +679,7 @@ class TransactionController {
             isPremium: true,
             role: user.role,
           };
-<span class="cstat-no" title="statement not covered" >          localStorage.setItem("user_data", JSON.stringify(user));</span>
+          // localStorage.setItem("user_data", JSON.stringify(user));
 <span class="cstat-no" title="statement not covered" >          return res.json({ message: `Transaction ${fraudStatus}` });</span>
         }
       } else <span class="cstat-no" title="statement not covered" ><span class="missing-if-branch" title="else path not taken" >E</span>if (transactionStatus === "settlement") {</span>
@@ -688,7 +688,7 @@ class TransactionController {
             { status: "success" });
           const user = <span class="cstat-no" title="statement not covered" >await User.findByPk(transaction.userId);</span>
 <span class="cstat-no" title="statement not covered" >          await user.update({ isPremium: true },);</span>
-<span class="cstat-no" title="statement not covered" >          localStorage.removeItem("user_data");</span>
+          // localStorage.removeItem("user_data");
 <span class="cstat-no" title="statement not covered" >          req.user_data = {</span>
             id: user.id,
             fullName: user.fullName,
@@ -696,7 +696,7 @@ class TransactionController {
             isPremium: true,
             role: user.role,
           };
-<span class="cstat-no" title="statement not covered" >          localStorage.setItem("user_data", JSON.stringify(user));</span>
+          // localStorage.setItem("user_data", JSON.stringify(user));
 <span class="cstat-no" title="statement not covered" >          return res.json({ message: `Transaction ${fraudStatus}` });</span>
       } else <span class="cstat-no" title="statement not covered" >if (</span>
         transactionStatus === "cancel" ||
@@ -799,7 +799,7 @@ module.exports = TransactionController;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-19T01:29:58.118Z
+                at 2025-09-21T10:25:57.878Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
