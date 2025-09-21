@@ -221,7 +221,7 @@ export const PaymentPage = () => {
           showSuccess('Payment successful! Welcome to Premium!');
           
           // Update local storage user data
-          const updatedUserData = { ...user_data, isPremium: true };
+          const updatedUserData = { ...user_data, status: true };
           localStorage.setItem('user_data', JSON.stringify(updatedUserData));
           
           // Refresh profile data from database
