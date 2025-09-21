@@ -14,6 +14,7 @@ export const LoginPage = () => {
         data
       })
       const { access_token, user_data } = response.data
+      console.log(response);
       localStorage.setItem('access_token', access_token)
       localStorage.setItem('user_data', JSON.stringify(user_data))
       successLogin()
