@@ -120,7 +120,7 @@ class TransactionController {
             { status: "success" });
           const user = await User.findByPk(transaction.userId);
           await user.update({ isPremium: true },);
-          localStorage.removeItem("user_data");
+          // localStorage.removeItem("user_data");
           req.user_data = {
             id: user.id,
             fullName: user.fullName,
@@ -128,7 +128,7 @@ class TransactionController {
             isPremium: true,
             role: user.role,
           };
-          localStorage.setItem("user_data", JSON.stringify(user));
+          // localStorage.setItem("user_data", JSON.stringify(user));
           return res.json({ message: `Transaction ${fraudStatus}` });
         }
       } else if (transactionStatus === "settlement") {
@@ -137,7 +137,7 @@ class TransactionController {
             { status: "success" });
           const user = await User.findByPk(transaction.userId);
           await user.update({ isPremium: true },);
-          localStorage.removeItem("user_data");
+          // localStorage.removeItem("user_data");
           req.user_data = {
             id: user.id,
             fullName: user.fullName,
@@ -145,7 +145,7 @@ class TransactionController {
             isPremium: true,
             role: user.role,
           };
-          localStorage.setItem("user_data", JSON.stringify(user));
+          // localStorage.setItem("user_data", JSON.stringify(user));
           return res.json({ message: `Transaction ${fraudStatus}` });
       } else if (
         transactionStatus === "cancel" ||

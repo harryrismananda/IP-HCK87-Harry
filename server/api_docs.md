@@ -3,7 +3,7 @@
 ## Overview
 BiblioLex is an AI-powered language learning platform API that provides endpoints for user authentication, course management, language learning, and progress tracking.
 
-**Base URL:** `http://localhost:3000`
+**Base URL:** `http://bibliolex.harryrismananda.site`
 
 **API Version:** 1.0.0
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1758245398222" clover="3.2.0">
-  <project timestamp="1758245398222" name="All files">
-    <metrics statements="540" coveredstatements="488" conditionals="157" coveredconditionals="128" methods="57" coveredmethods="57" elements="754" coveredelements="673" complexity="0" loc="540" ncloc="540" packages="6" files="21" classes="21"/>
+<coverage generated="1758450357982" clover="3.2.0">
+  <project timestamp="1758450357982" name="All files">
+    <metrics statements="530" coveredstatements="480" conditionals="153" coveredconditionals="123" methods="56" coveredmethods="56" elements="739" coveredelements="659" complexity="0" loc="530" ncloc="530" packages="6" files="21" classes="21"/>
     <package name="server">
       <metrics statements="15" coveredstatements="15" conditionals="2" coveredconditionals="1" methods="0" coveredmethods="0"/>
       <file name="app.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\app.js">
@@ -24,7 +24,7 @@
       </file>
     </package>
     <package name="server.controllers">
-      <metrics statements="346" coveredstatements="300" conditionals="114" coveredconditionals="93" methods="31" coveredmethods="31"/>
+      <metrics statements="342" coveredstatements="300" conditionals="114" coveredconditionals="93" methods="31" coveredmethods="31"/>
       <file name="AuthController.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\controllers\AuthController.js">
         <metrics statements="45" coveredstatements="45" conditionals="14" coveredconditionals="14" methods="3" coveredmethods="3"/>
         <line num="1" count="6" type="stmt"/>
@@ -222,7 +222,7 @@
         <line num="86" count="1" type="stmt"/>
       </file>
       <file name="TransactionController.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\controllers\TransactionController.js">
-        <metrics statements="60" coveredstatements="38" conditionals="26" coveredconditionals="15" methods="3" coveredmethods="3"/>
+        <metrics statements="56" coveredstatements="38" conditionals="26" coveredconditionals="15" methods="3" coveredmethods="3"/>
         <line num="1" count="6" type="stmt"/>
         <line num="2" count="6" type="stmt"/>
         <line num="3" count="6" type="stmt"/>
@@ -262,17 +262,13 @@
         <line num="119" count="26" type="stmt"/>
         <line num="121" count="0" type="stmt"/>
         <line num="122" count="0" type="stmt"/>
-        <line num="123" count="0" type="stmt"/>
         <line num="124" count="0" type="stmt"/>
-        <line num="131" count="0" type="stmt"/>
         <line num="132" count="0" type="stmt"/>
         <line num="134" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="136" count="0" type="stmt"/>
         <line num="138" count="0" type="stmt"/>
         <line num="139" count="0" type="stmt"/>
-        <line num="140" count="0" type="stmt"/>
         <line num="141" count="0" type="stmt"/>
-        <line num="148" count="0" type="stmt"/>
         <line num="149" count="0" type="stmt"/>
         <line num="150" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="155" count="0" type="stmt"/>
@@ -396,7 +392,7 @@
         <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
         <line num="1" count="6" type="stmt"/>
         <line num="3" count="6" type="stmt"/>
-        <line num="4" count="27" type="stmt"/>
+        <line num="4" count="26" type="stmt"/>
         <line num="7" count="6" type="stmt"/>
         <line num="8" count="4" type="stmt"/>
         <line num="11" count="6" type="stmt"/>
@@ -406,38 +402,38 @@
         <line num="1" count="6" type="stmt"/>
         <line num="2" count="6" type="stmt"/>
         <line num="4" count="6" type="stmt"/>
-        <line num="5" count="12" type="stmt"/>
+        <line num="5" count="11" type="stmt"/>
         <line num="7" count="6" type="stmt"/>
-        <line num="8" count="160" type="stmt"/>
+        <line num="8" count="159" type="stmt"/>
         <line num="10" count="6" type="stmt"/>
       </file>
     </package>
     <package name="server.middlewares">
-      <metrics statements="56" coveredstatements="51" conditionals="31" coveredconditionals="27" methods="4" coveredmethods="4"/>
+      <metrics statements="50" coveredstatements="43" conditionals="27" coveredconditionals="22" methods="3" coveredmethods="3"/>
       <file name="authentication.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\middlewares\authentication.js">
         <metrics statements="19" coveredstatements="17" conditionals="8" coveredconditionals="6" methods="1" coveredmethods="1"/>
         <line num="1" count="6" type="stmt"/>
         <line num="2" count="6" type="stmt"/>
         <line num="3" count="6" type="stmt"/>
-        <line num="4" count="182" type="stmt"/>
-        <line num="5" count="182" type="stmt"/>
-        <line num="6" count="182" type="cond" truecount="2" falsecount="0"/>
+        <line num="4" count="181" type="stmt"/>
+        <line num="5" count="181" type="stmt"/>
+        <line num="6" count="181" type="cond" truecount="2" falsecount="0"/>
         <line num="7" count="19" type="stmt"/>
-        <line num="9" count="163" type="stmt"/>
-        <line num="10" count="163" type="cond" truecount="2" falsecount="0"/>
+        <line num="9" count="162" type="stmt"/>
+        <line num="10" count="162" type="cond" truecount="2" falsecount="0"/>
         <line num="11" count="3" type="stmt"/>
-        <line num="14" count="160" type="stmt"/>
-        <line num="15" count="160" type="cond" truecount="1" falsecount="1"/>
+        <line num="14" count="159" type="stmt"/>
+        <line num="15" count="159" type="cond" truecount="1" falsecount="1"/>
         <line num="16" count="0" type="stmt"/>
-        <line num="19" count="160" type="stmt"/>
-        <line num="20" count="158" type="cond" truecount="1" falsecount="1"/>
+        <line num="19" count="159" type="stmt"/>
+        <line num="20" count="157" type="cond" truecount="1" falsecount="1"/>
         <line num="21" count="0" type="stmt"/>
-        <line num="23" count="158" type="stmt"/>
-        <line num="24" count="158" type="stmt"/>
+        <line num="23" count="157" type="stmt"/>
+        <line num="24" count="157" type="stmt"/>
         <line num="26" count="24" type="stmt"/>
       </file>
       <file name="authorization.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\middlewares\authorization.js">
-        <metrics statements="13" coveredstatements="11" conditionals="6" coveredconditionals="5" methods="2" coveredmethods="2"/>
+        <metrics statements="7" coveredstatements="5" conditionals="2" coveredconditionals="1" methods="1" coveredmethods="1"/>
         <line num="1" count="6" type="stmt"/>
         <line num="2" count="37" type="stmt"/>
         <line num="3" count="37" type="stmt"/>
@@ -445,20 +441,14 @@
         <line num="5" count="0" type="stmt"/>
         <line num="7" count="37" type="stmt"/>
         <line num="9" count="0" type="stmt"/>
-        <line num="12" count="6" type="stmt"/>
-        <line num="13" count="3" type="stmt"/>
-        <line num="14" count="3" type="cond" truecount="4" falsecount="0"/>
-        <line num="15" count="2" type="stmt"/>
-        <line num="17" count="1" type="stmt"/>
-        <line num="20" count="1" type="stmt"/>
       </file>
       <file name="errorHandler.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\middlewares\errorHandler.js">
-        <metrics statements="24" coveredstatements="23" conditionals="17" coveredconditionals="16" methods="1" coveredmethods="1"/>
+        <metrics statements="24" coveredstatements="21" conditionals="17" coveredconditionals="15" methods="1" coveredmethods="1"/>
         <line num="1" count="6" type="stmt"/>
-        <line num="2" count="95" type="stmt"/>
-        <line num="3" count="95" type="cond" truecount="11" falsecount="0"/>
-        <line num="5" count="1" type="stmt"/>
-        <line num="6" count="1" type="stmt"/>
+        <line num="2" count="94" type="stmt"/>
+        <line num="3" count="94" type="cond" truecount="10" falsecount="1"/>
+        <line num="5" count="0" type="stmt"/>
+        <line num="6" count="0" type="stmt"/>
         <line num="8" count="17" type="stmt"/>
         <line num="9" count="17" type="stmt"/>
         <line num="11" count="1" type="stmt"/>
@@ -558,8 +548,8 @@
         <line num="14" count="6" type="stmt"/>
         <line num="18" count="6" type="stmt"/>
         <line num="55" count="6" type="stmt"/>
-        <line num="56" count="27" type="stmt"/>
-        <line num="57" count="27" type="stmt"/>
+        <line num="56" count="26" type="stmt"/>
+        <line num="57" count="26" type="stmt"/>
         <line num="59" count="6" type="stmt"/>
       </file>
       <file name="userprogress.js" path="D:\Hacktiv8\Phase 2\IP-HCK87-Harry\server\models\userprogress.js">

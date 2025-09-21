@@ -5,7 +5,7 @@ const QuestionController = require('../controllers/QuestionController')
 const TransactionController = require('../controllers/TransactionController')
 const UserController = require('../controllers/UserController')
 const { authenticate } = require('../middlewares/authentication')
-const { guardAdmin, premiumAccess } = require('../middlewares/authorization')
+const { guardAdmin } = require('../middlewares/authorization')
 const router = require('express').Router()
 const multer = require(`multer`)
 const upload = multer({storage: multer.memoryStorage()})
@@ -38,7 +38,7 @@ router.put(`/user/:id/progress/:languageId`, UserController.updateUserProgress)
 
 
 //courses routes
-router.get(`/courses`, premiumAccess, CourseController.getAllCourses) //premium only
+router.get(`/courses`, CourseController.getAllCourses) //premium only
 router.post(`/courses`, CourseController.createCourse)
 router.get(`/courses/language/:languageId`, CourseController.getCourseByLanguageId) //some are preemium
 router.get(`/courses/:id`, CourseController.getCourseById) //some are preemium

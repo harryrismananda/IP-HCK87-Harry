@@ -23,7 +23,7 @@ export const CMSLayout = () => {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:flex lg:w-64 xl:w-72 flex-shrink-0">
         <SideBar />
       </div>
 
@@ -42,7 +42,7 @@ export const CMSLayout = () => {
         </div>
         
         {/* Page content */}
-        <div className="flex-1 p-4 lg:p-6 overflow-auto">
+        <div className="flex-1 p-4 lg:p-6 overflow-y-auto max-h-screen">
           <Outlet />    
         </div>
       </div>
