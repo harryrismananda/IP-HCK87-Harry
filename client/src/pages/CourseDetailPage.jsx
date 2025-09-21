@@ -17,6 +17,7 @@ export const CourseDetailPage = () => {
   const [isRegistered, setIsRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [expandedLessons, setExpandedLessons] = useState({});
+  const [userPremiumStatus, setUserPremiumStatus] = useState(false);
 
   useEffect(() => {
     if (!courseId) return;
@@ -26,6 +27,10 @@ export const CourseDetailPage = () => {
     
     // Fetch new course details
     dispatch(fetchCourseDetail(courseId));
+
+    // Get user premium status from localStorage
+    const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+    setUserPremiumStatus(userData.status || false);
   }, [courseId, dispatch]);
 
   // Check user registration when course data is loaded
@@ -99,6 +104,13 @@ export const CourseDetailPage = () => {
     }
   };
 
+  const isCoursePremiumRestricted = (course) => {
+    if (!course) return false;
+    // Non-premium users can only access Beginner courses
+    const difficulty = course.difficulty?.toLowerCase();
+    return !userPremiumStatus && (difficulty === 'intermediate' || difficulty === 'advanced');
+  };
+
   const toggleLessonExpansion = (lessonIndex) => {
     setExpandedLessons(prev => ({
       ...prev,
@@ -111,7 +123,15 @@ export const CourseDetailPage = () => {
       showError("You must be registered for this language to access the questions.");
       return;
     }
-    navigate(`/courses/${course.languageId}/questions`);
+
+    // Check premium restrictions
+    if (isCoursePremiumRestricted(course)) {
+      showError("This course requires a premium subscription. Please upgrade to access Intermediate and Advanced courses.");
+      navigate('/payment');
+      return;
+    }
+
+    navigate(`/courses/${course.id}/questions/${course.languageId}`);
   };
 
   const handleRegisterForLanguage = async () => {
@@ -240,6 +260,14 @@ export const CourseDetailPage = () => {
                       <span className={`badge ${getDifficultyColor(course.difficulty)}`}>
                         {course.difficulty}
                       </span>
+                      {isCoursePremiumRestricted(course) && (
+                        <span className="badge badge-warning">
+                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
+                          Premium Required
+                        </span>
+                      )}
                     </div>
                   </div>
                   
@@ -270,7 +298,22 @@ export const CourseDetailPage = () => {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col space-y-3 lg:min-w-[200px]">
-                  {isRegistered ? (
+                  {isCoursePremiumRestricted(course) ? (
+                    <div className="space-y-2">
+                      <button 
+                        className="btn btn-warning btn-lg"
+                        onClick={() => navigate('/payment')}
+                      >
+                        Upgrade to Premium
+                        <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      </button>
+                      <p className="text-xs text-center text-base-content/60">
+                        Premium required for {course.difficulty} courses
+                      </p>
+                    </div>
+                  ) : isRegistered ? (
                     <button 
                       className="btn btn-primary btn-lg"
                       onClick={handleStartQuestions}
@@ -480,8 +523,27 @@ export const CourseDetailPage = () => {
             </div>
           )}
 
+          {/* Premium Restriction Warning */}
+          {isCoursePremiumRestricted(course) && (
+            <div className="alert alert-warning mb-8">
+              <svg className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+              <div>
+                <h3 className="font-bold">Premium Subscription Required</h3>
+                <div className="text-xs">This is a {course.difficulty} level course that requires a premium subscription. Upgrade now to access all Intermediate and Advanced courses!</div>
+              </div>
+              <button 
+                className="btn btn-sm btn-warning"
+                onClick={() => navigate('/payment')}
+              >
+                Upgrade Now
+              </button>
+            </div>
+          )}
+
           {/* Registration Warning */}
-          {!isRegistered && (
+          {!isRegistered && !isCoursePremiumRestricted(course) && (
             <div className="alert alert-warning mb-8">
               <svg className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>

@@ -101,10 +101,18 @@ useEffect(() => {
                     </td>
                     <td>
                       <div className="flex gap-1 lg:gap-2">
-                        <button className="btn btn-ghost btn-xs">
-                          Edit
-                        </button>
-                        <button className="btn btn-ghost btn-xs text-error">
+                        <button onClick={async () => {
+                          try {
+                            await http ({
+                              method:"DELETE",
+                              url:`/languages/${language.id}`,
+                              headers:{Authorization: `Bearer ${localStorage.getItem(`access_token`)}`}
+                            })
+                            fetchLanguages()
+                          } catch (error) {
+                            showError(error)
+                          }
+                        }} className="btn btn-ghost btn-xs text-error">
                           Delete
                         </button>
                       </div>
@@ -156,7 +164,6 @@ useEffect(() => {
                   <th className="text-sm lg:text-base font-semibold">Title</th>
                   <th className="text-sm lg:text-base font-semibold hidden lg:table-cell">Language</th>
                   <th className="text-sm lg:text-base font-semibold">Difficulty</th>
-                  <th className="text-sm lg:text-base font-semibold hidden md:table-cell">Lessons</th>
                   <th className="text-sm lg:text-base font-semibold hidden sm:table-cell">Created At</th>
                   <th className="text-sm lg:text-base font-semibold">Actions</th>
                 </tr>
@@ -168,7 +175,7 @@ useEffect(() => {
                     <td className="font-semibold text-sm lg:text-base">{course.title}</td>
                     <td className="hidden lg:table-cell">
                       <span className="badge badge-outline text-xs">
-                        {course.languageName}
+                        {languages.find(lang => lang.id === course.languageId)?.name}
                       </span>
                     </td>
                     <td>
@@ -176,23 +183,24 @@ useEffect(() => {
                         {course.difficulty}
                       </span>
                     </td>
-                    <td className="text-center hidden md:table-cell">
-                      <span className="badge badge-info badge-outline text-xs">
-                        {course.lessonsCount} lessons
-                      </span>
-                    </td>
+                   
                     <td className="text-xs lg:text-sm text-base-content/70 hidden sm:table-cell">
                       {new Date(course.createdAt).toLocaleDateString()}
                     </td>
                     <td>
                       <div className="flex flex-col lg:flex-row gap-1 lg:gap-2">
-                        <button className="btn btn-ghost btn-xs">
-                          Edit
-                        </button>
-                        <button className="btn btn-ghost btn-xs text-info hidden lg:inline-flex">
-                          View
-                        </button>
-                        <button className="btn btn-ghost btn-xs text-error">
+                        <button onClick={async () => {
+                          try {
+                            await http({
+                              method:"DELETE",
+                              url:`/courses/${course.id}`,
+                              headers:{Authorization:`Bearer ${localStorage.getItem(`access_token`)}`}
+                            })
+                            fetchCourses()
+                          } catch (error) {
+                            showError(error)
+                          }
+                        }} className="btn btn-ghost btn-xs text-error">
                           Delete
                         </button>
                       </div>

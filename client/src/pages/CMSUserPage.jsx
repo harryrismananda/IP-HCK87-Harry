@@ -44,9 +44,6 @@ export const CMSUserPage = () => {
         <div className="card-body">
           <div className="flex justify-between items-center mb-6">
             <h2 className="card-title text-2xl">User Management</h2>
-            <button className="btn btn-primary">
-              Add New User
-            </button>
           </div>
 
           <div className="overflow-x-auto">

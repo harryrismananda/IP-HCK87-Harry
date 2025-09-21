@@ -35,7 +35,7 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/courses" element={<UserCoursePage />} />
             <Route path="/course/:courseId" element={<CourseDetailPage />} />
-            <Route path="/courses/:languageId/questions" element={<CourseQuestionPage />} />
+            <Route path="/courses/:courseId/questions/:languageId" element={<CourseQuestionPage />} />
             <Route path="/payment" element={<PaymentPage />} />
           </Route>
           <Route element={<CMSLayout />}>

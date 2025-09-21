@@ -5,9 +5,8 @@ import { showError, showSuccess } from "../helpers/alert";
 
 export const CourseQuestionPage = () => {
   const navigate = useNavigate();
-  const { languageId } = useParams();
-  const [courses, setCourses] = useState([]);
-  const [allQuestions, setAllQuestions] = useState([]);
+  const { courseId, languageId } = useParams();
+  const [course, setCourse] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState("");
@@ -18,9 +17,7 @@ export const CourseQuestionPage = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!languageId) return;
-
-    const fetchCoursesByLanguageId = async () => {
+    const fetchCourseAndQuestions = async () => {
       try {
         const token = localStorage.getItem('access_token');
         if (!token) {
@@ -28,56 +25,37 @@ export const CourseQuestionPage = () => {
           return;
         }
 
-        const response = await http({
+        // Fetch course details
+        const courseResponse = await http({
           method: 'GET',
-          url: `/courses/language/${languageId}`,
+          url: `/courses/${courseId}`,
           headers: { Authorization: `Bearer ${token}` }
         });
-        setCourses(response.data);
-      } catch (error) {
-        showError(error);
-        navigate('/courses');
-      }
-    };
+        setCourse(courseResponse.data);
 
-    const fetchQuestions = async () => {
-      try {
-        const token = localStorage.getItem('access_token');
-        if (!token) {
-          navigate('/login');
-          return;
-        }
-
-        const response = await http({
+        // Fetch questions for this specific course
+        const questionsResponse = await http({
           method: 'GET',
-          url: `/questions`,
+          url: `/questions/course/${courseId}`,
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        // Get all questions and we'll filter them later based on the courses for this language
-        setAllQuestions(response.data);
+        setQuestions(questionsResponse.data);
+        if (questionsResponse.data.length > 0) {
+          setCurrentQuestionIndex(0);
+        }
       } catch (error) {
         showError(error);
+        navigate('/courses');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCoursesByLanguageId();
-    fetchQuestions();
-  }, [languageId, navigate]);
-
-  // Filter questions when courses are loaded
-  useEffect(() => {
-    if (courses.length > 0 && allQuestions.length > 0) {
-      const courseIds = courses.map(course => course.id);
-      const filteredQuestions = allQuestions.filter(q => courseIds.includes(q.courseId));
-      setQuestions(filteredQuestions);
-      if (filteredQuestions.length > 0) {
-        setCurrentQuestionIndex(0);
-      }
+    if (courseId) {
+      fetchCourseAndQuestions();
     }
-  }, [courses, allQuestions]);
+  }, [courseId, navigate]);
 
   const handleAnswerSelect = (answer) => {
     setSelectedAnswer(answer);
@@ -130,12 +108,12 @@ export const CourseQuestionPage = () => {
       const token = localStorage.getItem('access_token');
       const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
       
-      if (!token || !userData.id) {
-        showError('User not authenticated');
+      if (!token || !userData.id || !languageId) {
+        showError('User not authenticated or language data missing');
         return;
       }
       
-      // Update progress for this language
+      // Update progress for this course's language
       await http({
         method: 'PUT',
         url: `/user/${userData.id}/progress/${languageId}`,
@@ -282,7 +260,7 @@ export const CourseQuestionPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold">
-                {courses.length > 0 ? courses[0]?.Language?.name || 'Language Courses' : 'Loading...'}
+                {course?.title || 'Course Questions'}
               </h1>
               <p className="text-sm text-base-content/60">
                 Question {currentQuestionIndex + 1} of {questions.length}

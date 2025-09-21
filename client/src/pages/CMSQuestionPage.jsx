@@ -1,5 +1,3 @@
-
-
 import { useEffect, useState } from "react";
 import { showError } from "../helpers/alert";
 import http from "../helpers/http";
@@ -14,7 +12,9 @@ export const CMSQuestionPage = () => {
         await http({
           method: "DELETE",
           url: `/questions/${id}`,
-          headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         });
         // Refresh the questions list after deletion
         fetchQuestions();
@@ -30,7 +30,9 @@ export const CMSQuestionPage = () => {
       const response = await http({
         method: "GET",
         url: "/questions",
-        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
       });
       setQuestions(response.data);
     } catch (error) {
@@ -43,27 +45,21 @@ export const CMSQuestionPage = () => {
   const getDifficultyBadge = (difficulty) => {
     const badges = {
       1: "badge-success",
-      2: "badge-warning", 
-      3: "badge-error"
+      2: "badge-warning",
+      3: "badge-error",
     };
     const labels = {
       1: "Beginner",
       2: "Intermediate",
-      3: "Advanced"
+      3: "Advanced",
     };
-    return { class: badges[difficulty] || "badge-ghost", label: labels[difficulty] || "Unknown" };
+    return {
+      class: badges[difficulty] || "badge-ghost",
+      label: labels[difficulty] || "Unknown",
+    };
   };
 
-  const getQuestionTypeBadge = (type) => {
-    const badges = {
-      "multiple_choice": "badge-primary",
-      "fill_blank": "badge-secondary",
-      "true_false": "badge-accent",
-      "short_answer": "badge-info"
-    };
-    return badges[type] || "badge-ghost";
-  };
-
+  
   useEffect(() => {
     fetchQuestions();
   }, []);
@@ -85,43 +81,26 @@ export const CMSQuestionPage = () => {
         <div className="card-body p-4 lg:p-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div>
-              <h2 className="card-title text-xl lg:text-2xl">Question Management</h2>
+              <h2 className="card-title text-xl lg:text-2xl">
+                Question Management
+              </h2>
               <p className="text-sm text-base-content/60 mt-1">
                 Manage questions for all courses and languages
               </p>
             </div>
-            <button className="btn btn-primary btn-sm lg:btn-md w-full sm:w-auto">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Add New Question
-            </button>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
             <div className="stat bg-base-200 rounded-lg p-3 lg:p-4">
-              <div className="stat-title text-xs lg:text-sm">Total Questions</div>
-              <div className="stat-value text-lg lg:text-2xl text-primary">{questions.length}</div>
-            </div>
-            <div className="stat bg-base-200 rounded-lg p-3 lg:p-4">
-              <div className="stat-title text-xs lg:text-sm">Multiple Choice</div>
-              <div className="stat-value text-lg lg:text-2xl text-secondary">
-                {questions.filter(q => q.type === 'multiple_choice').length}
+              <div className="stat-title text-xs lg:text-sm">
+                Total Questions
+              </div>
+              <div className="stat-value text-lg lg:text-2xl text-primary">
+                {questions.length}
               </div>
             </div>
-            <div className="stat bg-base-200 rounded-lg p-3 lg:p-4">
-              <div className="stat-title text-xs lg:text-sm">Beginner</div>
-              <div className="stat-value text-lg lg:text-2xl text-success">
-                {questions.filter(q => q.difficulty === 1).length}
-              </div>
-            </div>
-            <div className="stat bg-base-200 rounded-lg p-3 lg:p-4">
-              <div className="stat-title text-xs lg:text-sm">Advanced</div>
-              <div className="stat-value text-lg lg:text-2xl text-error">
-                {questions.filter(q => q.difficulty === 3).length}
-              </div>
-            </div>
+                       
           </div>
 
           {/* Questions Table */}
@@ -131,63 +110,52 @@ export const CMSQuestionPage = () => {
                 <tr>
                   <th className="text-xs lg:text-sm font-semibold">ID</th>
                   <th className="text-xs lg:text-sm font-semibold">Question</th>
-                  <th className="text-xs lg:text-sm font-semibold hidden lg:table-cell">Course</th>
-                  <th className="text-xs lg:text-sm font-semibold">Type</th>
-                  <th className="text-xs lg:text-sm font-semibold">Difficulty</th>
-                  <th className="text-xs lg:text-sm font-semibold hidden xl:table-cell">Answer</th>
+                  <th className="text-xs lg:text-sm font-semibold hidden lg:table-cell">
+                    Course
+                  </th>
                   <th className="text-xs lg:text-sm font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {questions.map((question) => {
-                  const difficultyBadge = getDifficultyBadge(question.difficulty);
+                  const difficultyBadge = getDifficultyBadge(
+                    question.difficulty
+                  );
                   return (
                     <tr key={question.id} className="hover:bg-base-200">
                       <td className="font-medium text-sm">{question.id}</td>
                       <td className="max-w-xs">
-                        <div className="text-sm font-medium truncate" title={question.prompt}>
-                          {question.prompt || question.questionName || 'No prompt'}
+                        <div
+                          className="text-sm font-medium truncate"
+                          name={question.questionName}
+                        >
+                          {question.questionName}
                         </div>
-                        {question.choices && (
-                          <div className="text-xs text-base-content/60 mt-1 lg:hidden">
-                            {Object.keys(question.choices).length} choices
-                          </div>
-                        )}
                       </td>
                       <td className="hidden lg:table-cell">
                         <span className="badge badge-outline badge-sm">
                           Course #{question.courseId}
                         </span>
                       </td>
-                      <td>
-                        <span className={`badge badge-sm ${getQuestionTypeBadge(question.type)}`}>
-                          {question.type?.replace('_', ' ') || 'N/A'}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`badge badge-sm ${difficultyBadge.class}`}>
-                          {difficultyBadge.label}
-                        </span>
-                      </td>
-                      <td className="hidden xl:table-cell">
-                        <div className="text-sm font-medium truncate max-w-32" title={question.answer}>
-                          {question.answer || 'N/A'}
-                        </div>
-                      </td>
+
                       <td>
                         <div className="flex gap-1 lg:gap-2">
-                          <button className="btn btn-ghost btn-xs">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                            </svg>
-                            <span className="hidden sm:inline">Edit</span>
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(question.id)} 
+                          <button
+                            onClick={() => handleDelete(question.id)}
                             className="btn btn-ghost btn-xs text-error"
                           >
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
                             </svg>
                             <span className="hidden sm:inline">Delete</span>
                           </button>
@@ -204,28 +172,27 @@ export const CMSQuestionPage = () => {
           {questions.length === 0 && (
             <div className="text-center py-12">
               <div className="text-base-content/60">
-                <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-16 h-16 mx-auto mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <p className="text-lg font-medium mb-2">No questions found</p>
-                <p className="text-sm">Create your first question to get started</p>
+                <p className="text-sm">
+                  Create your first question to get started
+                </p>
               </div>
               <button className="btn btn-primary mt-4">
                 Add First Question
               </button>
-            </div>
-          )}
-
-          {/* Pagination */}
-          {questions.length > 0 && (
-            <div className="flex justify-center mt-6">
-              <div className="join">
-                <button className="join-item btn btn-sm">«</button>
-                <button className="join-item btn btn-sm btn-active">1</button>
-                <button className="join-item btn btn-sm">2</button>
-                <button className="join-item btn btn-sm">3</button>
-                <button className="join-item btn btn-sm">»</button>
-              </div>
             </div>
           )}
         </div>
